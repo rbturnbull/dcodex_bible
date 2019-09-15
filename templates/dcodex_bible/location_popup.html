@@ -1,0 +1,25 @@
+{% load static %}
+<div id=locationOptionsClose class=closeButton></div>
+<center>
+<div style='float: none;'>Calculated Verse: <span id=approximateVerseFromPosition></span></div>
+<form>
+    <select name=book class=inputHeader id=bookAtLocation>
+        {% for book_name in verse.book_names %}
+            <option value="{{ forloop.counter0 }}" 
+            {% if forloop.counter0 == verse.book %}
+                selected=selected
+            {% endif %}
+            >{{ book_name }}</option>
+
+        {% endfor %}
+    </select>	
+    <input type=text name=chapter value="{{ verse.chapter }}" size=2 style='text-align: center;' class='inputHeader currentChapter' id=chapterAtLocation><span class=inputHeader>:</span>
+    <input type=text name=verse value="{{ verse.verse }}"  size=2 style='text-align: center;' class='inputHeader currentVerse' id=verseAtLocation>	
+    <input type="submit" value="" name=load class='inputHeader inputButton magnifyingGlass' id=loadVerseAtLocation >
+
+    <span data-verseid='{{ verse.prev.id }}' class='inputHeader inputButton loadVerseLink noselect prevVerseLink' >&nbsp;&nbsp;←&nbsp;&nbsp;</span>
+    <span data-verseid='{{ verse.next.id }}' class='inputHeader inputButton loadVerseLink noselect nextVerseLink' >&nbsp;&nbsp;→&nbsp;&nbsp;</span>
+    <br>
+    <input type="submit" value='&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;⚑&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' name=saveLocation id=saveLocation class='inputHeader inputButton '>
+</form>
+</center>

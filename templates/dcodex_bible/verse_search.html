@@ -1,0 +1,21 @@
+{% load static %}
+<form action="" method="GET">
+	<br><center><span class=inputHeader id=showManuscriptSelect>{{ manuscript }}</span>	
+	<select name=book id=bookSelect class=inputHeader>
+        {% for book_name in verse.book_names %}
+    		<option value="{{ forloop.counter0 }}" 
+            {% if forloop.counter0 == verse.book %}
+                selected=selected
+            {% endif %}
+            >{{ book_name }}</option>
+
+        {% endfor %}
+	</select>
+
+	<input type=text name=chapter value="{{ verse.chapter }}" size=2 style='text-align: center;' id=chapterSelect class=inputHeader><span class=inputHeader>:</span>
+	<input type=text name=verse value="{{ verse.verse }}"  size=2 style='text-align: center;' id=verseSelect class=inputHeader>	
+	<input type="submit" value="" name=search id=seekVerseButton  class='inputHeader inputButton magnifyingGlass'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+	<span data-verseid="{{ verse.prev.id }}" class='inputHeader inputButton seekVerseLink noselect'>&nbsp;&nbsp;←&nbsp;&nbsp;<span class="tooltiptext">{{ verse.prev.reference_abbreviation }}</span></span>
+	<span data-verseid='{{ verse.next.id }}' class='inputHeader inputButton seekVerseLink noselect'>&nbsp;&nbsp;→&nbsp;&nbsp;<span class="tooltiptext">{{ verse.next.reference_abbreviation }}</span></span>
+</form>
