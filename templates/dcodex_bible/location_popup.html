@@ -3,7 +3,7 @@
 <center>
 <div style='float: none;'>Calculated Verse: <span id=approximateVerseFromPosition></span></div>
 <form>
-    <select name=book class=inputHeader id=bookAtLocation>
+    <select name=book_id class='inputHeader verseLoadField' id=bookAtLocation>
         {% for book_name in verse.book_names %}
             <option value="{{ forloop.counter0 }}" 
             {% if forloop.counter0 == verse.book %}
@@ -13,8 +13,8 @@
 
         {% endfor %}
     </select>	
-    <input type=text name=chapter value="{{ verse.chapter }}" size=2 style='text-align: center;' class='inputHeader currentChapter' id=chapterAtLocation><span class=inputHeader>:</span>
-    <input type=text name=verse value="{{ verse.verse }}"  size=2 style='text-align: center;' class='inputHeader currentVerse' id=verseAtLocation>	
+    <input type=text name=chapter value="{{ verse.chapter }}" size=2 style='text-align: center;' class='inputHeader verseLoadField' id=chapterAtLocation><span class=inputHeader>:</span>
+    <input type=text name=verse value="{{ verse.verse }}"  size=2 style='text-align: center;' class='inputHeader verseLoadField' id=verseAtLocation>	
     <input type="submit" value="" name=load class='inputHeader inputButton magnifyingGlass' id=loadVerseAtLocation >
 
     <span data-verseid='{{ verse.prev.id }}' class='inputHeader inputButton loadVerseLink noselect prevVerseLink' >&nbsp;&nbsp;←&nbsp;&nbsp;</span>

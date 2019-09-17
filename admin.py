@@ -9,6 +9,4 @@ class BibleVerseAdmin(admin.ModelAdmin):
     search_fields = ['chapter', 'verse']
 
 
-#admin.site.register(Lection)
-#admin.site.register(LectionVerseSpan)
 admin.site.register(BibleManuscript)
