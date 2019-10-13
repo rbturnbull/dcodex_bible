@@ -17,8 +17,8 @@
     <input type=text name=verse value="{{ verse.verse }}"  size=2 style='text-align: center;' class='inputHeader verseLoadField' id=verseAtLocation>	
     <input type="submit" value="" name=load class='inputHeader inputButton magnifyingGlass' id=loadVerseAtLocation >
 
-    <span data-verseid='{{ verse.prev.id }}' class='inputHeader inputButton loadVerseLink noselect prevVerseLink' >&nbsp;&nbsp;←&nbsp;&nbsp;</span>
-    <span data-verseid='{{ verse.next.id }}' class='inputHeader inputButton loadVerseLink noselect nextVerseLink' >&nbsp;&nbsp;→&nbsp;&nbsp;</span>
+    <span data-verseid='{{ prev_verse.id }}' class='inputHeader inputButton loadVerseLink noselect prevVerseLink' >&nbsp;&nbsp;←&nbsp;&nbsp;</span>
+    <span data-verseid='{{ next_verse.id }}' class='inputHeader inputButton loadVerseLink noselect nextVerseLink' >&nbsp;&nbsp;→&nbsp;&nbsp;</span>
     <br>
     <input type="submit" value='&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;⚑&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' name=saveLocation id=saveLocation class='inputHeader inputButton '>
 </form>

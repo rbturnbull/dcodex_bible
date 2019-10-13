@@ -16,6 +16,6 @@
 	<input type=text name=verse value="{{ verse.verse }}"  size=2 style='text-align: center;' id=verseSelect class='inputHeader verseSearchField'>	
 	<input type="submit" value="" name=search id=seekVerseButton  class='inputHeader inputButton magnifyingGlass'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
-	<span data-verseid="{{ verse.prev.id }}" class='inputHeader inputButton seekVerseLink noselect'>&nbsp;&nbsp;←&nbsp;&nbsp;<span class="tooltiptext">{{ verse.prev.reference_abbreviation }}</span></span>
-	<span data-verseid='{{ verse.next.id }}' class='inputHeader inputButton seekVerseLink noselect'>&nbsp;&nbsp;→&nbsp;&nbsp;<span class="tooltiptext">{{ verse.next.reference_abbreviation }}</span></span>
+	<span data-verseid="{{ prev_verse.id }}" class='inputHeader inputButton seekVerseLink noselect'>&nbsp;&nbsp;←&nbsp;&nbsp;<span class="tooltiptext">{{ prev_verse.reference_abbreviation }}</span></span>
+	<span data-verseid='{{ next_verse.id }}' class='inputHeader inputButton seekVerseLink noselect'>&nbsp;&nbsp;→&nbsp;&nbsp;<span class="tooltiptext">{{ next_verse.reference_abbreviation }}</span></span>
 </form>
