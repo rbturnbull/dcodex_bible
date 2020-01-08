@@ -4,6 +4,46 @@ from dcodex.models import Manuscript, Verse, VerseTranscriptionBase
 import re
 import logging
 
+book_names = [None, "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi", "Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter", "1 John", "2 John", "3 John", "Jude", "Revelation" ]
+book_abbreviations = [None, "Gen", "Ex", "Lev", "Nu", "Deut", "Josh", "Jdg", "Ru", "1Sa", "2Sa", "1Ki", "2Ki", "1Chr", "2Chr", "Ez", "Neh", "Est", "Job", "Ps", "Pr", "Ecc", "Song", "Isa", "Jer", "Lam", "Ez", "Da", "Ho", "Jl", "Am", "Ob", "Jon", "Mic", "Nah", "Hab", "Zep", "Hag", "Zec", "Mal", "Mt", "Mk", "Lk", "Jn", "Acts", "Ro", "1Co", "2Co", "Ga", "Eph", "Ph", "Col", "1Th", "2Th", "1Tim", "2Tim", "Titus", "Phil", "Heb", "Jas", "1Pe", "2Pe", "1Jn", "2Jn", "3Jn", "Jud", "Rev"]
+
+def get_book_id(name):
+    if name in book_names:
+        return book_names.index( name )
+    if name in book_abbreviations:
+        return book_abbreviations.index( name )
+    return None
+
+
+def read_int( string ):
+    print('string to int', string)
+    return int(re.sub("[^0-9]", "", string))
+
+def components_from_verse_ref( verse_ref ):
+    print('verse_ref to components:', verse_ref)
+    verse_ref = verse_ref.strip()
+    
+    # Get Verse From End
+    components = verse_ref.split(":")
+    if len(components) == 1:
+        return None, None, read_int(verse_ref)
+    
+    verse = read_int( components[1])
+    
+    matches = re.match( "(.*?)\s*(\d+)", components[0] )
+    if matches:
+        book_name = matches.group(1)
+        if len(book_name) == 0:
+            book_id = None
+        else:
+            book_id = get_book_id( book_name )
+        chapter = read_int(matches.group(2))
+
+        return book_id, chapter, verse
+    
+    raise Exception('Cannot interpret verse %s' % (verse_ref))
+    
+
 class BibleManuscript(Manuscript):
     @classmethod
     def verse_class(cls):
@@ -22,8 +62,7 @@ class BibleVerse(Verse):
     char_aggregate = models.IntegerField(default=0)
     word_aggregate = models.IntegerField(default=0)
     
-    book_names = [None, "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi", "Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter", "1 John", "2 John", "3 John", "Jude", "Revelation" ]
-    book_abbreviations = [None, "Gen", "Ex", "Lev", "Nu", "Deut", "Josh", "Jdg", "Ru", "1Sa", "2Sa", "1Ki", "2Ki", "1Chr", "2Chr", "Ez", "Neh", "Est", "Job", "Ps", "Pr", "Ecc", "Song", "Isa", "Jer", "Lam", "Ez", "Da", "Ho", "Jl", "Am", "Ob", "Jon", "Mic", "Nah", "Hab", "Zep", "Hag", "Zec", "Mal", "Mt", "Mk", "Lk", "Jn", "Acts", "Ro", "1Co", "2Co", "Ga", "Eph", "Ph", "Col", "1Th", "2Th", "1Tim", "2Tim", "Titus", "Phil", "Heb", "Jas", "1Pe", "2Pe", "1Jn", "2Jn", "3Jn", "Jud", "Rev"]
+
 
     # Override
     def cumulative_mass(self):
@@ -36,6 +75,52 @@ class BibleVerse(Verse):
             dictionary.get('book_id', 1), 
             dictionary.get('chapter', 1), 
             dictionary.get('verse', 1) )
+
+    @classmethod
+    def get_verses_from_string( cls, passage_string ):
+        book = None
+        chapter = None
+        
+        verses = []
+        
+        passage_string = passage_string.replace( "-", "–" )
+        
+        passages_between_semis = passage_string.split(";")
+        for passage_between_semis in passages_between_semis:
+            passages_between_commas = passage_between_semis.split(",")
+            for passage_between_commas in passages_between_commas:
+                verse_ends = passage_between_commas.split("–")
+                if len(verse_ends) > 2:
+                    raise Exception('Cannot interpret %s in passage %s' % (passage_between_commas, passage_string))
+                start_verse_ref = verse_ends[0].strip()
+                end_verse_ref = verse_ends[1].strip() if len(verse_ends) > 1 else start_verse_ref
+                
+                start_verse_book_id, start_verse_chapter, start_verse_verse = components_from_verse_ref( start_verse_ref )
+                if start_verse_book_id is None:
+                    start_verse_book_id = book
+                if start_verse_chapter is None:
+                    start_verse_chapter = chapter
+
+                start_verse = cls.get_from_values( start_verse_book_id, start_verse_chapter, start_verse_verse )
+                
+                end_verse_book_id, end_verse_chapter, end_verse_verse = components_from_verse_ref( end_verse_ref )                
+                
+                if end_verse_book_id is None:
+                    end_verse_book_id = start_verse_book_id
+                if end_verse_chapter is None:
+                    end_verse_chapter = start_verse_chapter
+                
+#                print('xx', end_verse_book_id, end_verse_chapter, end_verse_verse)
+                
+                end_verse = cls.get_from_values( end_verse_book_id, end_verse_chapter, end_verse_verse )
+                
+                verses += cls.objects.filter( rank__gte=start_verse.rank, rank__lte=end_verse.rank ).all()
+                
+                book = end_verse_book_id
+                chapter = end_verse_chapter
+                                    
+        return verses
+
 
     # Override
     @classmethod
@@ -59,11 +144,7 @@ class BibleVerse(Verse):
     
     @classmethod
     def book_id( cls, name ):
-        if name in cls.book_names:
-            return cls.book_names.index( name )
-        if name in cls.book_abbreviations:
-            return cls.book_abbreviations.index( name )
-
+        return get_book_id( name )
 
     @classmethod
     def get_from_values( cls, book, chapter, verse ):
@@ -90,9 +171,9 @@ class BibleVerse(Verse):
     
     def book_name(self, abbreviation = False):
         if abbreviation:
-            names = self.book_abbreviations
+            names = book_abbreviations
         else:
-            names = self.book_names
+            names = book_names
         
         if self.book < len(names):
             return names[self.book]
