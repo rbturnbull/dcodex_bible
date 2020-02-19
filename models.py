@@ -62,6 +62,12 @@ class BibleVerse(Verse):
     char_aggregate = models.IntegerField(default=0)
     word_aggregate = models.IntegerField(default=0)
     
+    @classmethod
+    def book_names( cls ):
+        return book_names
+    @classmethod
+    def book_abbreviations( cls ):
+        return book_abbreviations
 
 
     # Override
