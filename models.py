@@ -53,6 +53,9 @@ class BibleManuscript(Manuscript):
     def location_popup_template(self):
         return 'dcodex_bible/location_popup.html'
 
+    def verse_from_mass_difference( self, reference_verse, additional_mass ):
+        return self.verse_class().verse_from_mass( reference_verse.cumulative_mass() + additional_mass )
+
 class BibleVerse(Verse):
     book = models.IntegerField()
     chapter = models.IntegerField()
@@ -69,6 +72,9 @@ class BibleVerse(Verse):
     def book_abbreviations( cls ):
         return book_abbreviations
 
+    @classmethod
+    def verse_from_mass( cls, mass ):
+        return cls.objects.filter( char_aggregate__lte=mass ).order_by('-char_aggregate').first()
 
     # Override
     def cumulative_mass(self):
