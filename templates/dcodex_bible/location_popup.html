@@ -1,7 +1,7 @@
 {% load static %}
 <div id=locationOptionsClose class=closeButton></div>
 <center>
-<div style='float: none;'>Calculated Verse: <span id=approximateVerseFromPosition></span></div>
+<div style='float: none;'>Approx. Verse: <span id=approximateVerseFromPosition></span></div>
 <form>
     <select name=book_id class='inputHeader verseLoadField' id=bookAtLocation>
         {% for book_name in verse.book_names %}
