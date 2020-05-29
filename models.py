@@ -16,11 +16,9 @@ def get_book_id(name):
 
 
 def read_int( string ):
-    print('string to int', string)
     return int(re.sub("[^0-9]", "", string))
 
 def components_from_verse_ref( verse_ref ):
-    print('verse_ref to components:', verse_ref)
     verse_ref = verse_ref.strip()
     
     # Get Verse From End
@@ -60,8 +58,8 @@ class BibleVerse(Verse):
     book = models.IntegerField()
     chapter = models.IntegerField()
     verse = models.IntegerField()
-    word_count = models.IntegerField()
-    char_count = models.IntegerField()
+    word_count = models.IntegerField(default=0)
+    char_count = models.IntegerField(default=0)
     char_aggregate = models.IntegerField(default=0)
     word_aggregate = models.IntegerField(default=0)
     
@@ -83,6 +81,10 @@ class BibleVerse(Verse):
     # Override
     @classmethod
     def get_from_dict( cls, dictionary ):
+        """
+        This function expects a dictionary with the keys 'book_id', 'chapter', and 'verse' and uses these values to find the corresponding Bible verse.
+        """
+    
         return cls.get_from_values(
             dictionary.get('book_id', 1), 
             dictionary.get('chapter', 1), 
@@ -90,6 +92,15 @@ class BibleVerse(Verse):
 
     @classmethod
     def get_verses_from_string( cls, passage_string ):
+        """ 
+        Returns a list of Bible Verse objects by interpreting the passages_string.
+        
+        The passages_string can has multiple references separated with a semi-colon.
+        e.g. 
+        'Mt 1:1–18'
+        'John 1:1–21:25'
+        'Lk 24:1-10; Mk 16:1–8'        
+        """
         book = None
         chapter = None
         
