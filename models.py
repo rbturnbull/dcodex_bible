@@ -201,9 +201,14 @@ class BibleVerse(Verse):
         if self.book < len(names):
             return names[self.book]
         return None
+
     def reference(self, abbreviation = False, end_verse=None):
         if end_verse != None:
-            return "%s–%s" % (self.reference( abbreviation=abbreviation ), end_verse.reference( abbreviation=abbreviation ) ) # TODO
+            if self.book == end_verse.book:
+                if self.chapter == end_verse.chapter:
+                    return "%s–%d" % (self.reference( abbreviation=abbreviation ), end_verse.verse )
+                return "%s–%d:%d" % (self.reference( abbreviation=abbreviation ), end_verse.chapter, end_verse.verse )
+            return "%s–%s" % (self.reference( abbreviation=abbreviation ), end_verse.reference( abbreviation=abbreviation ) )
     
         book_name = self.book_name(abbreviation)
         return "%s %d:%d" % (book_name, self.chapter, self.verse)
