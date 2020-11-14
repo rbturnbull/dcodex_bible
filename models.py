@@ -235,3 +235,4 @@ class RubricTranscription(VerseTranscriptionBase):
     def __str__(self):
         return "%s %s" % (self.get_location_display(), super(RubricTranscription, self).__str__() )
             
+
