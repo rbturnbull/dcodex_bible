@@ -10,7 +10,6 @@ INSTALLED_APPS = [
     'polymorphic',    
     "dcodex",
     "dcodex_bible",
-    "dcodex_lectionary",
     "tests",
 ]
 TEMPLATES = [

@@ -1,3 +1,3 @@
 # dcodex_bible
 
-An extension for DCodex to use Biblical Manuscripts
+An extension for DCodex to use biblical manuscripts
