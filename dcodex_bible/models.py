@@ -90,6 +90,24 @@ class BibleVerse(Verse):
             dictionary.get('chapter', 1), 
             dictionary.get('verse', 1) )
 
+    # Override
+    def tei_id( self ):
+        """ 
+        Method to get an id that can be used to reference this verse in TEI.
+
+        Verses are encpasulated in a <ab> tag.
+        The id returned by this function is given as the n attribute in this tag.
+        e.g. <ab n='B04K1V35'>...
+
+        By default, this is the string representation of this verse.
+        """
+        if self.book < 40:
+            prefix = "A%02d" % self.book # Is this correct?
+        else:
+            prefix = "B%02d" % (self.book-39)
+
+        return f"{prefix}K{self.chapter}V{self.verse}"
+
     @classmethod
     def get_verses_from_string( cls, passage_string ):
         """ 
