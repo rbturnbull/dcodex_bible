@@ -1,3 +1,33 @@
 # dcodex_bible
 
-An extension for DCodex to use biblical manuscripts
+An extension for DCodex to use biblical manuscripts.
+
+## Installation
+
+For a brand new DCodex site, it is easiest to install using [dcodex-cookiecutter](https://github.com/rbturnbull/dcodex-cookiecutter).
+
+To install dcodex-bible as a plugin in a dcodex site already set up. Install with pip:
+```
+pip install -e https://github.com/rbturnbull/dcodex_bible.git#egg=dcodex_bible
+```
+
+Then add to your installed apps:
+```
+INSTALLED_APPS += [
+    "dcodex_bible",
+]
+```
+
+Then add the urls to your main urls.py:
+```
+urlpatterns += [
+    path('dcodex_bible/', include('dcodex_bible.urls')),    
+]
+```
+
+## Database Fixture
+
+To use the standard versification system of the Old and New Testaments, install the database fixture:
+```
+python manage.py loaddata bibleverses
+```
