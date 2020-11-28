@@ -12,6 +12,11 @@ def get_book_id(name):
         return book_names.index( name )
     if name in book_abbreviations:
         return book_abbreviations.index( name )
+    
+    for index, book_name in enumerate(book_names[1:]):
+        if book_name.startswith(name):
+            return index + 1
+
     return None
 
 
@@ -53,6 +58,14 @@ class BibleManuscript(Manuscript):
 
     def verse_from_mass_difference( self, reference_verse, additional_mass ):
         return self.verse_class().verse_from_mass( reference_verse.cumulative_mass() + additional_mass )
+
+    def latex(self):
+        """ Returns a LaTeX representation of this manuscript as a string. """
+        from django.template import loader
+        template = loader.get_template('dcodex_bible/latex_manuscript.latex')
+        context = dict(manuscript=self)
+        return template.render(context)
+
 
 class BibleVerse(Verse):
     book = models.IntegerField()
@@ -170,6 +183,9 @@ class BibleVerse(Verse):
         if matches:
             book_name = matches.group(1)
             book = BibleVerse.book_id( book_name )
+            if not book:
+                print("Cannot find book:", verse_as_string)
+                raise
             
             chapter = matches.group(2)
             if not chapter or len(chapter) == 0:
@@ -189,6 +205,9 @@ class BibleVerse(Verse):
 
     @classmethod
     def get_from_values( cls, book, chapter, verse ):
+        if not book or not chapter or not verse:
+            print("Cannot find verse:", book, chapter, verse)
+            raise
         max_chapters = cls.chapters_in_book(book)
         chapter = min( int(chapter), max_chapters )
         max_verses = cls.verses_in_chapter(book, chapter)

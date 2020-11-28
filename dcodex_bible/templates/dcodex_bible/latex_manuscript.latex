@@ -1,0 +1,102 @@
+{% load dcodex_bible %}
+
+\documentclass[twoside,letterpaper,11pt]{book}
+\usepackage[paperheight=240mm,paperwidth=160mm,inner=18mm,outer=33mm,bottom=33mm,top=26mm]{geometry} % Brill no crop
+%\usepackage[paperheight  =297mm,paperwidth   =210mm,layoutheight=240mm,layoutwidth=160mm,layoutvoffset= 29mm,layouthoffset= 35mm,inner=18mm,outer=33mm,bottom=33mm,top=26mm,includeheadfoot,  showframe=false, showcrop=true]{geometry} % Brill with crop
+\usepackage{mathtools}
+\usepackage[T1]{fontenc}
+\usepackage{ebgaramond}
+\usepackage{lipsum}
+\usepackage{polyglossia}
+
+\usepackage{fixltx2e}
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+\usepackage{lettrine}
+\usepackage{fancyhdr}
+  \pagestyle{fancy}
+  \fancyhf{}
+%  \fancyhead[RO,LE]{\rightmark}
+	\fancyhead[RO,LE]{\thepage}
+	\fancyhead[C]{\rightmark}
+%  \renewcommand{\headrulewidth}{.5pt}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\setromanfont{Brill}
+\newfontfamily\arabicfont[Script=Arabic,Scale=1.4]{Scheherazade}
+
+\newfontfamily\bkfont{Brill}
+
+\usepackage[Latin,Arabic]{ucharclasses}
+\usepackage{titlesec}
+
+\setTransitionsForArabics{\arabicfont}{\bkfont}
+
+\setdefaultlanguage{english}
+\setotherlanguage{arabic}
+
+\usepackage{setspace}
+\doublespacing
+
+\usepackage{scrextend}
+% \deffootnote[0em]{2em}{0em}{\textsuperscript{\thefootnotemark}\,}
+% \let\thefootnote\relax
+
+
+\setlength{\headwidth}{\textwidth}
+	\setlength{\headheight}{0mm}
+	\setlength{\headsep}{9mm}
+
+\setlength{\columnseprule}{0pt}
+\clubpenalty10000
+\widowpenalty10000
+
+\makeatletter
+\newcommand\versenumcolor{black}
+\newcommand\chapnumcolor{black}
+\renewcommand\paragraph{%
+  \@startsection{paragraph}{4}{\z@}%
+                {.25ex \@plus.25ex \@minus.1ex}%
+                {-.5em}%
+                {\normalfont\normalsize\bfseries\color{\versenumcolor}}}%
+\newlength{\biblechapskip}
+  \setlength{\biblechapskip}{1em plus .33em minus .2em}
+\newcounter{biblechapter}
+\newcounter{bibleverse}[biblechapter]
+\renewcommand\chaptername{}
+\let\ltx@chapter=\chapter
+\let\ltx@paragraph=\paragraph
+\newcommand{\book}[1]{%
+  \gdef\currbook{#1}
+  \ltx@chapter{#1}}
+\newcount\biblechap@svdopt
+\newenvironment{biblechapter}[1][\thebiblechapter]
+  {\biblechap@svdopt=#1
+  \ifnum\c@biblechapter=\biblechap@svdopt\else
+    \advance\biblechap@svdopt by -1\fi
+  \setcounter{biblechapter}{\the\biblechap@svdopt}
+  \refstepcounter{biblechapter}
+  \lettrine{\color{\chapnumcolor}\lower-6pt\hbox{\thebiblechapter}}{}\ignorespaces}
+  {\vspace{\biblechapskip}}
+\renewcommand{\verse}[1][\thebibleverse]{%
+  \refstepcounter{bibleverse}
+  \setcounter{bibleverse}{#1}
+  \markright{% verbatim %}{{\scshape\lowercase{\currbook}} \thebiblechapter:#1}{% endverbatim %}
+  \ifnum\c@bibleverse=1\else{\color{\versenumcolor}\textsuperscript{#1}}\fi
+    }%
+\makeatother
+
+\title{ {{ manuscript }} }
+\date{}
+\author{}
+
+\titleformat{\chapter}[display]
+  {\normalfont\bfseries}{}{0pt}{\Huge}
+
+\begin{document}
+
+\mainmatter
+
+{{ manuscript|latex_body }}
+
+\end{document}
