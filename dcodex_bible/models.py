@@ -56,6 +56,7 @@ class BibleManuscript(Manuscript):
     def location_popup_template(self):
         return 'dcodex_bible/location_popup.html'
 
+
     def verse_from_mass_difference( self, reference_verse, additional_mass ):
         return self.verse_class().verse_from_mass( reference_verse.cumulative_mass() + additional_mass )
 
