@@ -1,11 +1,13 @@
 from django import template
 from django.utils.safestring import mark_safe
 import logging
+from django.urls import reverse
+
 
 register = template.Library()
 
-@register.filter
-def latex_body(manuscript):
+@register.simple_tag
+def latex_body(manuscript, baseurl):
     tex  = "\n"
 
     prev_book = None
@@ -41,7 +43,13 @@ def latex_body(manuscript):
 
         verse_number = transcription.verse.verse
         footnote = ""
-        tex += "\\verse[%d] %s%s\n" % (verse_number, footnote, verse_text)
+
+        if baseurl:
+            url = baseurl + reverse( 'dcodex-manuscript-verse',  kwargs=dict(request_siglum=manuscript.siglum, request_verse=transcription.verse.url_ref() ))
+        else:
+            url = None
+
+        tex += "\\verse[%d] %s\href{%s}{%s}\n" % (verse_number, footnote, url, verse_text)
 
     if in_chapter:
         tex += "\n\\end{biblechapter}\n"

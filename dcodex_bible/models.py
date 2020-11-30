@@ -60,11 +60,11 @@ class BibleManuscript(Manuscript):
     def verse_from_mass_difference( self, reference_verse, additional_mass ):
         return self.verse_class().verse_from_mass( reference_verse.cumulative_mass() + additional_mass )
 
-    def latex(self):
+    def latex(self, baseurl=None):
         """ Returns a LaTeX representation of this manuscript as a string. """
         from django.template import loader
         template = loader.get_template('dcodex_bible/latex_manuscript.latex')
-        context = dict(manuscript=self)
+        context = dict(manuscript=self, baseurl=baseurl)
         return template.render(context)
 
 

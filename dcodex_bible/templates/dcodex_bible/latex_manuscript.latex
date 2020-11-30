@@ -8,6 +8,11 @@
 \usepackage{ebgaramond}
 \usepackage{lipsum}
 \usepackage{polyglossia}
+\usepackage[hidelinks]{hyperref}
+\hypersetup{
+  hidelinks=true,
+  colorlinks=false,
+}
 
 \usepackage{fixltx2e}
 \usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
@@ -97,6 +102,6 @@
 
 \mainmatter
 
-{{ manuscript|latex_body }}
+{% latex_body manuscript baseurl %}
 
 \end{document}
