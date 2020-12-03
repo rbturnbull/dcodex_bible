@@ -3,9 +3,19 @@ from django.db.models import Max, Min
 from dcodex.models import Manuscript, Verse, VerseTranscriptionBase
 import re
 import logging
+import requests
+from lxml import etree
+from bs4 import BeautifulSoup
 
 book_names = [None, "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi", "Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter", "1 John", "2 John", "3 John", "Jude", "Revelation" ]
 book_abbreviations = [None, "Gen", "Ex", "Lev", "Nu", "Deut", "Josh", "Jdg", "Ru", "1Sa", "2Sa", "1Ki", "2Ki", "1Chr", "2Chr", "Ez", "Neh", "Est", "Job", "Ps", "Pr", "Ecc", "Song", "Isa", "Jer", "Lam", "Ez", "Da", "Ho", "Jl", "Am", "Ob", "Jon", "Mic", "Nah", "Hab", "Zep", "Hag", "Zec", "Mal", "Mt", "Mk", "Lk", "Jn", "Acts", "Ro", "1Co", "2Co", "Ga", "Eph", "Ph", "Col", "1Th", "2Th", "1Tim", "2Tim", "Titus", "Phil", "Heb", "Jas", "1Pe", "2Pe", "1Jn", "2Jn", "3Jn", "Jud", "Rev"]
+
+
+def strip_namespace( el ):
+	if hasattr(el, 'tag') and '}' in el.tag:
+		el.tag = el.tag.split('}', 1)[1]  # strip all namespaces
+	for x in el:
+		strip_namespace( x )
 
 def get_book_id(name):
     if name in book_names:
@@ -51,8 +61,10 @@ class BibleManuscript(Manuscript):
     @classmethod
     def verse_class(cls):
         return BibleVerse
+
     def verse_search_template(self):
         return "dcodex_bible/verse_search.html"
+
     def location_popup_template(self):
         return 'dcodex_bible/location_popup.html'
 
@@ -66,6 +78,72 @@ class BibleManuscript(Manuscript):
         template = loader.get_template('dcodex_bible/latex_manuscript.latex')
         context = dict(manuscript=self, baseurl=baseurl)
         return template.render(context)
+
+    def import_gregory_aland(self, gregory_aland=None):
+        gregory_aland = gregory_aland or self.siglum
+
+        self.import_igntp_iohannes(gregory_aland)
+        # TODO add INTF
+        
+    def import_igntp_iohannes(self, gregory_aland=None):
+        gregory_aland = gregory_aland or self.siglum
+        if self.siglum == None:
+            self.siglum = gregory_aland
+
+        m = re.match( r"GA(\d+)", gregory_aland )
+        if m:
+            gregory_aland = m.group(1)
+
+        url = f"http://www.itseeweb.bham.ac.uk/iohannes/transcriptions/XML/greek/04_{gregory_aland}.xml"
+
+        response = requests.get(url)
+        tree = etree.fromstring(response.content)
+        strip_namespace(tree)
+
+        # Find all verses
+        verses = tree.findall('.//ab')
+        for verse_element in verses: 
+            if 'n' not in verse_element.attrib:
+                continue
+
+            tei_verse_ID = verse_element.attrib['n']
+            verse = self.verse_class().get_from_tei_id(tei_verse_ID)
+            if not verse:
+                raise Exception(f"Cannot find verse {tei_verse_ID}.")
+                        
+            verse_text = ""
+            delim = ""
+            for element in verse_element:
+                if element.tag == 'pb':
+                    delim = ""
+                if element.tag == 'w' and 'part' in element.attrib:
+                    delim = ""
+                    element.attrib.pop('part')
+                xml_string = etree.tostring(element, encoding='UTF-8', method='xml').decode('utf-8')
+                xml_string = BeautifulSoup(xml_string, "lxml").text # This is a bit of a hack
+                
+                verse_text = verse_text + delim + xml_string
+                delim = " "
+            verse_text = verse_text.replace('\n','')	
+            verse_text = re.sub(r"\s+", " ", verse_text)
+            verse_text = re.sub(r"<w>(.*?)<\/w>", r"\1", verse_text) # I don't think this is necessary now
+            
+            print(verse, verse_text)
+            self.save_transcription( verse, verse_text )        
+
+
+
+    @classmethod
+    def create_from_gregory_aland(cls, gregory_aland):
+        if gregory_aland and gregory_aland[0].isdigit():
+            gregory_aland = f"GA{gregory_aland}"
+
+        manuscript, _ = cls.objects.update_or_create( siglum=gregory_aland )
+        if manuscript.name is None:
+            manuscript.name = gregory_aland
+        
+        manuscript.import_gregory_aland()
+        
 
 
 class BibleVerse(Verse):
@@ -121,6 +199,18 @@ class BibleVerse(Verse):
             prefix = "B%02d" % (self.book-39)
 
         return f"{prefix}K{self.chapter}V{self.verse}"
+
+    @classmethod
+    def get_from_tei_id( cls, tei_id):
+        """ Finds a BibleVerse object from a TEI ID string. """
+        m = re.match(r"B(\d*)K(\d*)V(\d*)",	tei_id)
+        verse = None
+        if m:
+            book = int(m.group(1)) + 39 #number of books in OT
+            chapter = int(m.group(2))
+            verse_num = int(m.group(3))
+            return cls.get_from_values(book, chapter, verse_num)
+        return None
 
     @classmethod
     def get_verses_from_string( cls, passage_string ):
