@@ -83,7 +83,7 @@ class BibleManuscript(Manuscript):
         gregory_aland = gregory_aland or self.siglum
 
         self.import_igntp_iohannes(gregory_aland)
-        # TODO add INTF
+        self.import_intf(gregory_aland)
         
     def import_igntp_iohannes(self, gregory_aland=None):
         gregory_aland = gregory_aland or self.siglum
@@ -96,6 +96,39 @@ class BibleManuscript(Manuscript):
 
         url = f"http://www.itseeweb.bham.ac.uk/iohannes/transcriptions/XML/greek/04_{gregory_aland}.xml"
 
+        self.import_intf_tei_url(url)
+
+    def import_intf(self, gregory_aland=None):
+        gregory_aland = gregory_aland or self.siglum
+        if self.siglum == None:
+            self.siglum = gregory_aland
+
+        m = re.match( r"GA(0?\d+)", gregory_aland )
+        if m:
+            gregory_aland = m.group(1)
+
+        if len(gregory_aland) == 0:
+            print(f"Cannot get GA number.")
+            return
+
+        # Get INTF ID
+        m = re.match(r"P(\d+)", gregory_aland)
+        if m:
+            intf_id = 10000 + int(m.group(1))
+        m = re.match(r"0(\d+)", gregory_aland)
+        if m:
+            intf_id = 20000 + int(m.group(1))
+        elif gregory_aland.isdigit():
+            intf_id = 30000 + int(gregory_aland)
+        else:
+            print(f"Cannot get INTF ID from {gregory_aland}")
+            return
+
+        url = f"http://ntvmr.uni-muenster.de/community/vmr/api/transcript/get/?docID={intf_id}&pageID=1-99999&format=teiraw"
+        self.import_intf_tei_url(url)
+
+    def import_intf_tei_url(self, url):
+        """ Imports from a TEI document in the format of the INTF and Birmingham. """
         response = requests.get(url)
         tree = etree.fromstring(response.content)
         strip_namespace(tree)
@@ -109,7 +142,8 @@ class BibleManuscript(Manuscript):
             tei_verse_ID = verse_element.attrib['n']
             verse = self.verse_class().get_from_tei_id(tei_verse_ID)
             if not verse:
-                raise Exception(f"Cannot find verse {tei_verse_ID}.")
+                continue
+                # raise Exception(f"Cannot find verse {tei_verse_ID}.")
                         
             verse_text = ""
             delim = ""
@@ -129,8 +163,7 @@ class BibleManuscript(Manuscript):
             verse_text = re.sub(r"<w>(.*?)<\/w>", r"\1", verse_text) # I don't think this is necessary now
             
             print(verse, verse_text)
-            self.save_transcription( verse, verse_text )        
-
+            self.save_transcription( verse, verse_text )    
 
 
     @classmethod
@@ -209,6 +242,7 @@ class BibleVerse(Verse):
             book = int(m.group(1)) + 39 #number of books in OT
             chapter = int(m.group(2))
             verse_num = int(m.group(3))
+            print("book, chapter, verse_num", book, chapter, verse_num)
             return cls.get_from_values(book, chapter, verse_num)
         return None
 
@@ -300,6 +334,8 @@ class BibleVerse(Verse):
             print("Cannot find verse:", book, chapter, verse)
             raise
         max_chapters = cls.chapters_in_book(book)
+        if not max_chapters:
+            raise Exception("Cannot find verse with book id '{book}'. Have you loaded the Bible Verses fixture?")
         chapter = min( int(chapter), max_chapters )
         max_verses = cls.verses_in_chapter(book, chapter)
         verse = min( int(verse), max_verses )
