@@ -25,9 +25,9 @@ urlpatterns += [
 ]
 ```
 
-## Database Fixture
+## Installing Bible Verses
 
-To use the standard versification system of the Old and New Testaments, install the database fixture:
+To use the standard versification system of the Old and New Testaments, run this command:
 ```
-python manage.py loaddata bibleverses
+python manage.py import_bibleverses
 ```
