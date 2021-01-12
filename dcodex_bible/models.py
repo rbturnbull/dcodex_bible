@@ -25,14 +25,16 @@ def get_book_id(name):
         return book_abbreviations.index( name )
     
     for index, book_name in enumerate(book_names[1:]):
-        if book_name.startswith(name):
+        if book_name.startswith(name) or book_name.replace(" ", "").startswith(name):
             return index + 1
 
     book_abbreviations_alternate = {
-        "Phlm": book_names.index("Philemon"),
+        "Phlm": "Philemon",
+        "1Kgs": "1 Kings",
+        "2Kgs": "2 Kings",
     }
     if name in book_abbreviations_alternate:
-        return book_abbreviations_alternate[name]
+        return book_names.index(book_abbreviations_alternate[name])
 
     return None
 
@@ -311,7 +313,7 @@ class BibleVerse(Verse):
     # Override
     @classmethod
     def get_from_string( cls, verse_as_string ):
-        matches = re.match( "([a-zA-Z]+)[\s\.]*(\d*)[-:\.]+(\d*)", verse_as_string )
+        matches = re.match( "([1-2a-zA-Z]+)[\s\.]*(\d*)[-:\.]+(\d*)", verse_as_string )
         if matches:
             book_name = matches.group(1)
             book = BibleVerse.book_id( book_name )
