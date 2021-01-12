@@ -11,6 +11,7 @@ book_names = [None, "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", 
 book_abbreviations = [None, "Gen", "Ex", "Lev", "Nu", "Deut", "Josh", "Jdg", "Ru", "1Sa", "2Sa", "1Ki", "2Ki", "1Chr", "2Chr", "Ez", "Neh", "Est", "Job", "Ps", "Pr", "Ecc", "Song", "Isa", "Jer", "Lam", "Ez", "Da", "Ho", "Jl", "Am", "Ob", "Jon", "Mic", "Nah", "Hab", "Zep", "Hag", "Zec", "Mal", "Mt", "Mk", "Lk", "Jn", "Acts", "Ro", "1Co", "2Co", "Ga", "Eph", "Ph", "Col", "1Th", "2Th", "1Tim", "2Tim", "Titus", "Phil", "Heb", "Jas", "1Pe", "2Pe", "1Jn", "2Jn", "3Jn", "Jud", "Rev"]
 
 
+
 def strip_namespace( el ):
 	if hasattr(el, 'tag') and '}' in el.tag:
 		el.tag = el.tag.split('}', 1)[1]  # strip all namespaces
@@ -26,6 +27,12 @@ def get_book_id(name):
     for index, book_name in enumerate(book_names[1:]):
         if book_name.startswith(name):
             return index + 1
+
+    book_abbreviations_alternate = {
+        "Phlm": book_names.index("Philemon"),
+    }
+    if name in book_abbreviations_alternate:
+        return book_abbreviations_alternate[name]
 
     return None
 
@@ -304,7 +311,7 @@ class BibleVerse(Verse):
     # Override
     @classmethod
     def get_from_string( cls, verse_as_string ):
-        matches = re.match( "([a-zA-Z]+)\s*(\d*)[-:]*(\d*)", verse_as_string )
+        matches = re.match( "([a-zA-Z]+)[\s\.]*(\d*)[-:\.]+(\d*)", verse_as_string )
         if matches:
             book_name = matches.group(1)
             book = BibleVerse.book_id( book_name )
