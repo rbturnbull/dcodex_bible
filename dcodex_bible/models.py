@@ -19,6 +19,7 @@ def strip_namespace( el ):
 		strip_namespace( x )
 
 def get_book_id(name):
+    name = name.title()
     if name in book_names:
         return book_names.index( name )
     if name in book_abbreviations:
@@ -313,7 +314,7 @@ class BibleVerse(Verse):
     # Override
     @classmethod
     def get_from_string( cls, verse_as_string ):
-        matches = re.match( "([1-2]*\s*[a-zA-Z]+)[\s\.]*(\d*)[-:\.]*(\d*)", verse_as_string )
+        matches = re.match( "(\d*\s*[a-zA-Z]+)[\s\.]*(\d*)[-:\.]*(\d*)", verse_as_string )
         if matches:
             book_name = matches.group(1)
             book = BibleVerse.book_id( book_name )
