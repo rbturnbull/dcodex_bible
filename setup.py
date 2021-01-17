@@ -6,6 +6,8 @@ requirements = [
     'numpy',
     'pandas>=1.0.5',
     'matplotlib',
+    'requests',
+    'lxml',
 ]
 
 setup(

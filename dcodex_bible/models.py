@@ -313,13 +313,12 @@ class BibleVerse(Verse):
     # Override
     @classmethod
     def get_from_string( cls, verse_as_string ):
-        matches = re.match( "([1-2a-zA-Z]+)[\s\.]*(\d*)[-:\.]+(\d*)", verse_as_string )
+        matches = re.match( "([1-2]*\s*[a-zA-Z]+)[\s\.]*(\d*)[-:\.]*(\d*)", verse_as_string )
         if matches:
             book_name = matches.group(1)
             book = BibleVerse.book_id( book_name )
             if not book:
-                print("Cannot find book:", verse_as_string)
-                raise
+                raise Exception(f"Cannot find book '{book_name}'. Taken from '{verse_as_string}.'")
             
             chapter = matches.group(2)
             if not chapter or len(chapter) == 0:
@@ -331,7 +330,7 @@ class BibleVerse(Verse):
                 
             return cls.get_from_values(book, chapter, verse)
         else:
-            return None
+            raise Exception(f"Cannot find verse: '{verse_as_string}'.")
     
     @classmethod
     def book_id( cls, name ):
