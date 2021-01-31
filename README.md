@@ -31,3 +31,16 @@ To use the standard versification system of the Old and New Testaments, run this
 ```
 python manage.py import_bibleverses
 ```
+
+## Installing Reference Bibles
+
+If you want to install a reference Bible text, you can use one (or more) of the following commands:
+```
+python manage.py import_sblgnt
+python manage.py import_robinsonpierpont
+python manage.py import_textusreceptus
+python manage.py import_tisch
+python manage.py import_westcotthort
+python manage.py import_smithvandyck
+python manage.py import_smithvandyck_nt
+```
