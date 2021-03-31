@@ -20,4 +20,4 @@ six==1.15.0
 soupsieve==2.0.1
 sqlparse==0.4.1
 requests==2.25.1
-lxml==4.6.2
+lxml==4.6.3
