@@ -8,6 +8,7 @@ requirements = [
     'matplotlib',
     'requests',
     'lxml',
+    'django-imagedeck @ git+https://gitlab.unimelb.edu.au/rturnbull/django-imagedeck.git#egg=django-imagedeck',
 ]
 
 setup(

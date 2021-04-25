@@ -1,0 +1,6 @@
+[run]
+source = dcodex_bible
+
+[report]
+precision = 2
+

@@ -53,7 +53,7 @@ def components_from_verse_ref( verse_ref ):
     
     verse = read_int( components[1])
     
-    matches = re.match( "(.*?)\s*(\d+)", components[0] )
+    matches = re.match( "(\d*\s*[a-zA-Z]+)\s*(\d+)", components[0] )
     if matches:
         book_name = matches.group(1)
         if len(book_name) == 0:
@@ -340,8 +340,8 @@ class BibleVerse(Verse):
     @classmethod
     def get_from_values( cls, book, chapter, verse ):
         if not book or not chapter or not verse:
-            print("Cannot find verse:", book, chapter, verse)
-            raise
+            raise Exception("Cannot find verse:", book, chapter, verse)
+            
         max_chapters = cls.chapters_in_book(book)
         if not max_chapters:
             raise Exception("Cannot find verse with book id '{book}'. Have you loaded the Bible Verses fixture?")
@@ -365,7 +365,7 @@ class BibleVerse(Verse):
         except:
             return 1
     
-    def book_name(self, abbreviation = False):
+    def book_name(self, abbreviation=False):
         if abbreviation:
             names = book_abbreviations
         else:
@@ -375,7 +375,7 @@ class BibleVerse(Verse):
             return names[self.book]
         return None
 
-    def reference(self, abbreviation = False, end_verse=None):
+    def reference(self, abbreviation=False, end_verse=None):
         if end_verse != None:
             if self.book == end_verse.book:
                 if self.chapter == end_verse.chapter:
