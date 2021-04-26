@@ -20,6 +20,12 @@ class BibleVerseTests(TestCase):
         self.second_corinthians10_15 = make_verse('2 Corinthians', chapter=10, verse=15 )
         self.third_john1_1 = make_verse('3 John', chapter=1, verse=1 )
 
+        self.hebrews = []
+        for chapter in range(1,8):
+            for verse in range(1,20): # Not actually the case. Just for testing
+                self.hebrews.append(make_verse('Hebrews', chapter=chapter, verse=verse ))
+        self.hebrews_ids = {x.id for x in self.hebrews}
+
     def test_get_from_string(self):
         self.assertEqual( self.romans1_1.id, BibleVerse.get_from_string( "Romans 1:1" ).id )
         self.assertEqual( self.romans1_1.id, BibleVerse.get_from_string( "Ro 1:1" ).id )
@@ -43,5 +49,9 @@ class BibleVerseTests(TestCase):
     def test_get_verses_from_string(self):
         self.assertEqual( [self.first_corinthians1_17.id], [x.id for x in BibleVerse.get_verses_from_string("1 Corinthians 1:17")])
         self.assertEqual( [self.first_corinthians1_17.id]+[x.id for x in self.first_corinthians2_passage], [x.id for x in BibleVerse.get_verses_from_string("1 Co 1:17; 2:9–19")])
+        hebrews_verses = BibleVerse.get_verses_from_string("Heb 1:17–22; 2:9–12,14; 3:1–3,5–6; 4:3–5:5,7–8; 6:5–9,11–18; 7:3–6,10–14")
+        hebrews_verse_ids = {x.id for x in hebrews_verses}
+        self.assertEqual( 59, len(hebrews_verse_ids))
+        self.assertTrue( hebrews_verse_ids.issubset(self.hebrews_ids) )
 
 
