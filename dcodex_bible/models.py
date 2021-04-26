@@ -64,6 +64,11 @@ def components_from_verse_ref( verse_ref ):
 
         return book_id, chapter, verse
     
+    if components[0].strip().isdigit():
+        book_id = None
+        chapter = read_int( components[0])
+        return book_id, chapter, verse
+    
     raise Exception('Cannot interpret verse %s' % (verse_ref))
     
 
