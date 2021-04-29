@@ -31,6 +31,7 @@ def get_book_id(name):
 
     book_abbreviations_alternate = {
         "Phlm": "Philemon",
+        "Phm": "Philemon",
         "1Kgs": "1 Kings",
         "2Kgs": "2 Kings",
     }
@@ -43,25 +44,46 @@ def get_book_id(name):
 def read_int( string ):
     return int(re.sub("[^0-9]", "", string))
 
-def components_from_verse_ref( verse_ref ):
-    verse_ref = verse_ref.strip()
-    
-    # Get Verse From End
-    components = verse_ref.split(":")
-    if len(components) == 1:
-        return None, None, read_int(verse_ref)
-    
-    verse = read_int( components[1])
-    
-    matches = re.match( "(\d*\s*[a-zA-Z]+)\s*(\d+)", components[0] )
+def try_book_and_number( verse_ref ):
+    matches = re.match( "(\d*\s*[a-zA-Z]+)\s*(\d+)", verse_ref )
     if matches:
         book_name = matches.group(1)
         if len(book_name) == 0:
             book_id = None
         else:
             book_id = get_book_id( book_name )
-        chapter = read_int(matches.group(2))
+        number = read_int(matches.group(2))
+    
+        return book_id, number
+    return None, None
 
+def single_chapter_book_names():
+    return ["Philemon", "Jude", "2 John", "3 John", "Obadiah"]
+
+def single_chapter_book_ids():
+    return [book_names.index(book_name) for book_name in single_chapter_book_names()]
+
+def components_from_verse_ref( verse_ref ):
+    verse_ref = verse_ref.strip()
+    
+    # Get Verse From End
+    components = verse_ref.split(":")
+    if len(components) == 1:
+        if verse_ref.strip().isdigit():
+            return None, None, read_int(verse_ref)
+        
+        # Try single chapter books
+        book_id, verse = try_book_and_number(verse_ref)
+        if verse:
+            if book_id in single_chapter_book_ids():
+                return book_id, 1, verse
+
+        raise Exception(f'Cannot interpret verse {verse_ref}')
+
+    verse = read_int( components[1])
+    
+    book_id, chapter = try_book_and_number(components[0])
+    if chapter:
         return book_id, chapter, verse
     
     if components[0].strip().isdigit():

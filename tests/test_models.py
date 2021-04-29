@@ -41,6 +41,7 @@ class BibleVerseTests(TestCase):
         self.assertEqual( self.second_corinthians10_15.id, BibleVerse.get_from_string( "2Corinth10-15" ).id )
 
         self.assertEqual( self.third_john1_1.id, BibleVerse.get_from_string( "3Jn1:1" ).id )
+        self.assertEqual( self.third_john1_1.id, BibleVerse.get_from_string( "3Jn1" ).id )
 
     def test_components_from_verse_ref(self):
         self.assertEqual( (46,1,17), components_from_verse_ref("1 Corinthians 1:17"))
