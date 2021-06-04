@@ -5,7 +5,7 @@ chardet==4.0.0
 coverage==5.5
 cycler==0.10.0
 -e git+https://github.com/rbturnbull/dcodex@39368d03ab13c1cdd2a85d30ff83c98c1051b798#egg=dcodex
-Django==3.2
+Django==3.2.1
 django-admin-sortable2==1.0
 django-appconf==1.0.4
 django-filer==2.0.2
