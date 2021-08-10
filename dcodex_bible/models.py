@@ -1,11 +1,14 @@
 from django.db import models
 from django.db.models import Max, Min
-from dcodex.models import Manuscript, Verse, VerseTranscriptionBase
+from dcodex.models import Manuscript, Verse, VerseTranscriptionBase, Markup
 import re
 import logging
 import requests
 from lxml import etree
 from bs4 import BeautifulSoup
+import unicodedata
+from django.utils.functional import cached_property
+
 
 book_names = [None, "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi", "Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter", "1 John", "2 John", "3 John", "Jude", "Revelation" ]
 book_abbreviations = [None, "Gen", "Ex", "Lev", "Nu", "Deut", "Josh", "Jdg", "Ru", "1Sa", "2Sa", "1Ki", "2Ki", "1Chr", "2Chr", "Ez", "Neh", "Est", "Job", "Ps", "Pr", "Ecc", "Song", "Isa", "Jer", "Lam", "Ez", "Da", "Ho", "Jl", "Am", "Ob", "Jon", "Mic", "Nah", "Hab", "Zep", "Hag", "Zec", "Mal", "Mt", "Mk", "Lk", "Jn", "Acts", "Ro", "1Co", "2Co", "Ga", "Eph", "Ph", "Col", "1Th", "2Th", "1Tim", "2Tim", "Titus", "Phil", "Heb", "Jas", "1Pe", "2Pe", "1Jn", "2Jn", "3Jn", "Jud", "Rev"]
@@ -34,6 +37,14 @@ def get_book_id(name):
         "Phm": "Philemon",
         "1Kgs": "1 Kings",
         "2Kgs": "2 Kings",
+        "2Th": "2 Thessalonians",
+        "2T": "2 Timothy",
+        "2J": "2 John",
+        "3J": "3 John",
+        "Jd": "Jude",
+        "Ap": "Revelation",
+        "Mc": "Mark",
+        "L": "Luke",
     }
     if name in book_abbreviations_alternate:
         return book_names.index(book_abbreviations_alternate[name])
@@ -119,7 +130,10 @@ class BibleManuscript(Manuscript):
     def import_gregory_aland(self, gregory_aland=None):
         gregory_aland = gregory_aland or self.siglum
 
-        self.import_igntp_iohannes(gregory_aland)
+        try:
+            self.import_igntp_iohannes(gregory_aland)
+        except:
+            print("import_igntp_iohannes failed")
         self.import_intf(gregory_aland)
         
     def import_igntp_iohannes(self, gregory_aland=None):
@@ -152,14 +166,15 @@ class BibleManuscript(Manuscript):
         m = re.match(r"P(\d+)", gregory_aland)
         if m:
             intf_id = 10000 + int(m.group(1))
-        m = re.match(r"0(\d+)", gregory_aland)
-        if m:
-            intf_id = 20000 + int(m.group(1))
-        elif gregory_aland.isdigit():
-            intf_id = 30000 + int(gregory_aland)
         else:
-            print(f"Cannot get INTF ID from {gregory_aland}")
-            return
+            m = re.match(r"0(\d+)", gregory_aland)
+            if m:
+                intf_id = 20000 + int(m.group(1))
+            elif gregory_aland.isdigit():
+                intf_id = 30000 + int(gregory_aland)
+            else:
+                print(f"Cannot get INTF ID from {gregory_aland}")
+                return
 
         url = f"http://ntvmr.uni-muenster.de/community/vmr/api/transcript/get/?docID={intf_id}&pageID=1-99999&format=teiraw"
         self.import_intf_tei_url(url)
@@ -177,6 +192,7 @@ class BibleManuscript(Manuscript):
                 continue
 
             tei_verse_ID = verse_element.attrib['n']
+
             verse = self.verse_class().get_from_tei_id(tei_verse_ID)
             if not verse:
                 continue
@@ -274,14 +290,22 @@ class BibleVerse(Verse):
     def get_from_tei_id( cls, tei_id):
         """ Finds a BibleVerse object from a TEI ID string. """
         m = re.match(r"B(\d*)K(\d*)V(\d*)",	tei_id)
-        verse = None
         if m:
             book = int(m.group(1)) + 39 #number of books in OT
             chapter = int(m.group(2))
             verse_num = int(m.group(3))
             print("book, chapter, verse_num", book, chapter, verse_num)
-            return cls.get_from_values(book, chapter, verse_num)
+            try:
+                verse = cls.get_from_values(book, chapter, verse_num)
+                return verse
+            except:
+                print(f"Cannot find verse from {tei_id}")
         return None
+
+    @classmethod
+    def get_verses_from_string_qs( cls, passage_string ):
+        ids = [verse.id for verse in cls.get_verses_from_string(passage_string)]
+        return cls.objects.filter(id__in=ids)
 
     @classmethod
     def get_verses_from_string( cls, passage_string ):
@@ -371,7 +395,7 @@ class BibleVerse(Verse):
             
         max_chapters = cls.chapters_in_book(book)
         if not max_chapters:
-            raise Exception("Cannot find verse with book id '{book}'. Have you loaded the Bible Verses fixture?")
+            raise Exception(f"Cannot find verse with book id '{book}'. Have you loaded the Bible Verses fixture?")
         chapter = min( int(chapter), max_chapters )
         max_verses = cls.verses_in_chapter(book, chapter)
         verse = min( int(verse), max_verses )
@@ -414,9 +438,6 @@ class BibleVerse(Verse):
         return "%s %d:%d" % (book_name, self.chapter, self.verse)
 
 
-
-        
-        
 class RubricTranscription(VerseTranscriptionBase):
     BEFORE = 'B'
     MIDDLE = 'M'
@@ -435,3 +456,36 @@ class RubricTranscription(VerseTranscriptionBase):
     def __str__(self):
         return "%s %s" % (self.get_location_display(), super(RubricTranscription, self).__str__() )
             
+
+class NestleAlandMarkup(Markup):
+
+    @cached_property
+    def translate_dict(self):
+        strings_to_delete = [".","°",'⸊',',','°', '⸉', '⸆','·', '⸀', '⸂', '⸃', "[", "]", '⸆', '·', '⸋', '⸁', '—', '[', ']', '˸', '⸇', '⸅', ';', '⸌', '⸄',]
+
+        sigla = ["°", "⸀", "⸋", "", "⸉", "˸"]
+        for siglum in sigla:
+            for i in range(1,4):
+                strings_to_delete.append(f"{siglum}{i}")
+
+        translate_dict = {c:"" for c in strings_to_delete}
+        translate_dict['ς'] = 'σ'
+        translate_dict['\xa0'] = ' '
+        return translate_dict 
+
+    def regularize( self, string ):
+        string = string.lower()
+
+        # Strip Greek Accents
+        string = ''.join((c for c in unicodedata.normalize('NFD', string) if unicodedata.category(c) != 'Mn')).lower().replace("'", "").replace("ʼ", '')
+
+        for key, value in self.translate_dict.items():
+            string = string.replace(key,value)
+
+        assert '°' not in string
+
+        string = re.sub(r"\s\s+", " ", string)
+
+        return string
+
+

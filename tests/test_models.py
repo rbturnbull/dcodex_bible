@@ -26,6 +26,10 @@ class BibleVerseTests(TestCase):
                 self.hebrews.append(make_verse('Hebrews', chapter=chapter, verse=verse ))
         self.hebrews_ids = {x.id for x in self.hebrews}
 
+        self.acts2_2 = make_verse('Acts', chapter=2, verse=2 )
+        self.acts1_1 = make_verse('Acts', chapter=1, verse=1 )
+
+
     def test_get_from_string(self):
         self.assertEqual( self.romans1_1.id, BibleVerse.get_from_string( "Romans 1:1" ).id )
         self.assertEqual( self.romans1_1.id, BibleVerse.get_from_string( "Ro 1:1" ).id )
@@ -42,6 +46,8 @@ class BibleVerseTests(TestCase):
 
         self.assertEqual( self.third_john1_1.id, BibleVerse.get_from_string( "3Jn1:1" ).id )
         self.assertEqual( self.third_john1_1.id, BibleVerse.get_from_string( "3Jn1" ).id )
+        self.assertEqual( self.acts2_2.id, BibleVerse.get_from_string( "Ac 2.2" ).id )
+        self.assertEqual( self.acts1_1.id, BibleVerse.get_from_string( "Ac 1.1" ).id )
 
     def test_components_from_verse_ref(self):
         self.assertEqual( (46,1,17), components_from_verse_ref("1 Corinthians 1:17"))

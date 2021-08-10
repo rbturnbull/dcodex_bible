@@ -13,3 +13,9 @@ class BibleVerseAdmin(admin.ModelAdmin):
 @admin.register(BibleManuscript)
 class BibleManuscriptAdmin(ManuscriptChildAdmin):
     base_model = BibleManuscript  # Explicitly set here!
+
+
+@admin.register(NestleAlandMarkup)
+class NestleAlandMarkupAdmin(admin.ModelAdmin):
+    pass
+
