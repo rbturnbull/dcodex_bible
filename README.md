@@ -1,4 +1,6 @@
-# dcodex_bible
+# DCodex Bible
+
+![pipline](https://github.com/rbturnbull/dcodex_bible/actions/workflows/pipeline.yml/badge.svg)
 
 An extension for DCodex to use biblical manuscripts.
 
