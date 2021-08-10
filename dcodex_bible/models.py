@@ -76,10 +76,9 @@ def single_chapter_book_ids():
 
 def components_from_verse_ref( verse_ref ):
     verse_ref = verse_ref.strip()
-    
-    # Get Verse From End
-    components = verse_ref.split(":")
-    if len(components) == 1:
+
+    matches = re.match( "(.+)[:\.](\d+)", verse_ref )
+    if not matches:
         if verse_ref.strip().isdigit():
             return None, None, read_int(verse_ref)
         
@@ -89,7 +88,9 @@ def components_from_verse_ref( verse_ref ):
             if book_id in single_chapter_book_ids():
                 return book_id, 1, verse
 
-        raise Exception(f'Cannot interpret verse {verse_ref}')
+        raise Exception(f'Cannot interpret verse: {verse_ref}')
+
+    components = [matches.group(1), matches.group(2) ]
 
     verse = read_int( components[1])
     
@@ -266,7 +267,8 @@ class BibleVerse(Verse):
         return cls.get_from_values(
             dictionary.get('book_id', 1), 
             dictionary.get('chapter', 1), 
-            dictionary.get('verse', 1) )
+            dictionary.get('verse', 1) ,
+        )
 
     # Override
     def tei_id( self ):

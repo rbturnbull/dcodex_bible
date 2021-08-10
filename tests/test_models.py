@@ -52,6 +52,7 @@ class BibleVerseTests(TestCase):
     def test_components_from_verse_ref(self):
         self.assertEqual( (46,1,17), components_from_verse_ref("1 Corinthians 1:17"))
         self.assertEqual( (46,2,9), components_from_verse_ref("1 Co 2:9"))
+        self.assertEqual( (44,1,1), components_from_verse_ref("Ac 1.1"))
 
     def test_get_verses_from_string(self):
         self.assertEqual( [self.first_corinthians1_17.id], [x.id for x in BibleVerse.get_verses_from_string("1 Corinthians 1:17")])
@@ -60,5 +61,9 @@ class BibleVerseTests(TestCase):
         hebrews_verse_ids = {x.id for x in hebrews_verses}
         self.assertEqual( 59, len(hebrews_verse_ids))
         self.assertTrue( hebrews_verse_ids.issubset(self.hebrews_ids) )
+        self.assertEqual( [self.acts1_1.id], [x.id for x in BibleVerse.get_verses_from_string("Ac 1.1")])
+        self.assertEqual( [self.acts1_1.id, self.acts2_2.id], [x.id for x in BibleVerse.get_verses_from_string("Ac 1.1; 2:2")])
+
+        
 
 
