@@ -45,6 +45,7 @@ def get_book_id(name):
         "Ap": "Revelation",
         "Mc": "Mark",
         "L": "Luke",
+        "Php": "Philippians",
     }
     if name in book_abbreviations_alternate:
         return book_names.index(book_abbreviations_alternate[name])

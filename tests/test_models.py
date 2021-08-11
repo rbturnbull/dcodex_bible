@@ -29,6 +29,8 @@ class BibleVerseTests(TestCase):
         self.acts2_2 = make_verse('Acts', chapter=2, verse=2 )
         self.acts1_1 = make_verse('Acts', chapter=1, verse=1 )
 
+        self.philippians1_20 = make_verse('Philippians', chapter=1, verse=20 )
+        self.philippians1_27 = make_verse('Philippians', chapter=1, verse=27 )
 
     def test_get_from_string(self):
         self.assertEqual( self.romans1_1.id, BibleVerse.get_from_string( "Romans 1:1" ).id )
@@ -48,6 +50,9 @@ class BibleVerseTests(TestCase):
         self.assertEqual( self.third_john1_1.id, BibleVerse.get_from_string( "3Jn1" ).id )
         self.assertEqual( self.acts2_2.id, BibleVerse.get_from_string( "Ac 2.2" ).id )
         self.assertEqual( self.acts1_1.id, BibleVerse.get_from_string( "Ac 1.1" ).id )
+        self.assertEqual( self.philippians1_20.id, BibleVerse.get_from_string( "Php 1.20" ).id )
+        self.assertEqual( self.philippians1_27.id, BibleVerse.get_from_string( "Php 1.27" ).id )
+        
 
     def test_components_from_verse_ref(self):
         self.assertEqual( (46,1,17), components_from_verse_ref("1 Corinthians 1:17"))
@@ -63,7 +68,6 @@ class BibleVerseTests(TestCase):
         self.assertTrue( hebrews_verse_ids.issubset(self.hebrews_ids) )
         self.assertEqual( [self.acts1_1.id], [x.id for x in BibleVerse.get_verses_from_string("Ac 1.1")])
         self.assertEqual( [self.acts1_1.id, self.acts2_2.id], [x.id for x in BibleVerse.get_verses_from_string("Ac 1.1; 2:2")])
-
         
 
 

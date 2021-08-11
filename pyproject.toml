@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dcodex_bible"
-version = "1.0.6"
+version = "1.0.7"
 description = "An extension for D-Codex to use biblical manuscripts."
 authors = ["Robert Turnbull <robert.turnbull@unimelb.edu.au>"]
 license = "Apache 2.0"
@@ -13,5 +13,5 @@ dcodex = {git = "https://github.com/rbturnbull/dcodex.git"}
 coverage = "^5.5"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["setuptools >= 40.6.0", "poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
