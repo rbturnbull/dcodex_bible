@@ -31,6 +31,10 @@ class BibleVerseTests(TestCase):
 
         self.philippians1_20 = make_verse('Philippians', chapter=1, verse=20 )
         self.philippians1_27 = make_verse('Philippians', chapter=1, verse=27 )
+        self.titus1_15 = make_verse('Titus', chapter=1, verse=15 )
+
+        self.first_peter1_1 = make_verse('1 Peter', chapter=1, verse=1 )
+        self.second_peter2_9 = make_verse('2 Peter', chapter=2, verse=9 )
 
     def test_get_from_string(self):
         self.assertEqual( self.romans1_1.id, BibleVerse.get_from_string( "Romans 1:1" ).id )
@@ -52,7 +56,9 @@ class BibleVerseTests(TestCase):
         self.assertEqual( self.acts1_1.id, BibleVerse.get_from_string( "Ac 1.1" ).id )
         self.assertEqual( self.philippians1_20.id, BibleVerse.get_from_string( "Php 1.20" ).id )
         self.assertEqual( self.philippians1_27.id, BibleVerse.get_from_string( "Php 1.27" ).id )
-        
+        self.assertEqual( self.titus1_15.id, BibleVerse.get_from_string( "Tt 1.15" ).id )        
+        self.assertEqual( self.first_peter1_1.id, BibleVerse.get_from_string( "1Pt 1.1" ).id )        
+        self.assertEqual( self.second_peter2_9.id, BibleVerse.get_from_string( "2Pt 2.9" ).id )        
 
     def test_components_from_verse_ref(self):
         self.assertEqual( (46,1,17), components_from_verse_ref("1 Corinthians 1:17"))
