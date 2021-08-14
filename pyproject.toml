@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dcodex_bible"
-version = "1.0.7"
+version = "1.0.8"
 description = "An extension for D-Codex to use biblical manuscripts."
 authors = ["Robert Turnbull <robert.turnbull@unimelb.edu.au>"]
 license = "Apache 2.0"
