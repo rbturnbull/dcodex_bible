@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dcodex_bible', '0003_auto_20210216_0331'),
+        ("dcodex_bible", "0003_auto_20210216_0331"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='biblemanuscript',
-            options={'base_manager_name': 'objects'},
+            name="biblemanuscript",
+            options={"base_manager_name": "objects"},
         ),
     ]

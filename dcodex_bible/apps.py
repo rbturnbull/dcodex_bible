@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class DcodexBibleConfig(AppConfig):
-    name = 'dcodex_bible'
+    name = "dcodex_bible"

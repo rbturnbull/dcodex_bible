@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dcodex_bible', '0001_initial'),
+        ("dcodex_bible", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='bibleverse',
-            name='char_count',
+            model_name="bibleverse",
+            name="char_count",
             field=models.IntegerField(default=0),
         ),
         migrations.AlterField(
-            model_name='bibleverse',
-            name='word_count',
+            model_name="bibleverse",
+            name="word_count",
             field=models.IntegerField(default=0),
         ),
     ]

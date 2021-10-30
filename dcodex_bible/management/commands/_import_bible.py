@@ -3,12 +3,28 @@ from pathlib import Path
 import dcodex_bible
 from dcodex_bible.models import BibleManuscript
 
+
 class ImportBibleCommand(BaseCommand):
-    
+    siglum = ""
+    name = ""
+    filename = ""
+
+    def get_siglum(self):
+        assert self.siglum
+        return self.siglum
+
+    def get_name(self):
+        assert self.name
+        return self.name
+
+    def get_filename(self):
+        assert self.filename
+        return self.filename
+
     def handle(self, *args, **options):
         dcodex_bible_path = Path(dcodex_bible.__file__).parents[0]
-        path = dcodex_bible_path / "data" / self.filename
-        
+        path = dcodex_bible_path / "data" / self.get_filename()
+
         # Check to see if already present
         ms = BibleManuscript.objects.filter(siglum=self.siglum).first()
         if ms:
@@ -17,4 +33,6 @@ class ImportBibleCommand(BaseCommand):
             if choice.lower() != "y":
                 return
 
-        BibleManuscript.create_from_csv(siglum=options[], name=self.name, filename=path)
+        BibleManuscript.create_from_csv(
+            siglum=self.get_siglum(), name=self.get_name(), filename=path
+        )

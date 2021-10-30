@@ -1,1 +1,1 @@
-default_app_config = 'dcodex_bible.apps.DcodexBibleConfig'
+default_app_config = "dcodex_bible.apps.DcodexBibleConfig"

@@ -6,9 +6,10 @@ from django.urls import reverse
 
 register = template.Library()
 
+
 @register.simple_tag
 def latex_body(manuscript, baseurl):
-    tex  = "\n"
+    tex = "\n"
 
     prev_book = None
     prev_chapter = None
@@ -25,8 +26,8 @@ def latex_body(manuscript, baseurl):
             if rtl:
                 tex += "\\unsetRL\n"
                 rtl = False
-                
-            tex += "\\book{%s}\n" % transcription.verse.book_name( abbreviation=False )
+
+            tex += "\\book{%s}\n" % transcription.verse.book_name(abbreviation=False)
             prev_book = transcription.verse.book
             prev_chapter = None
 
@@ -36,7 +37,7 @@ def latex_body(manuscript, baseurl):
             if not rtl and manuscript.is_rtl():
                 tex += "\\setRL\n"
                 rtl = True
-            
+
             tex += "\\begin{biblechapter}[%d]\n" % transcription.verse.chapter
             prev_chapter = transcription.verse.chapter
             in_chapter = True
@@ -45,12 +46,23 @@ def latex_body(manuscript, baseurl):
         footnote = ""
 
         if baseurl:
-            url = baseurl + reverse( 'dcodex-manuscript-verse',  kwargs=dict(request_siglum=manuscript.siglum, request_verse=transcription.verse.url_ref() ))
+            url = baseurl + reverse(
+                "dcodex-manuscript-verse",
+                kwargs=dict(
+                    request_siglum=manuscript.siglum,
+                    request_verse=transcription.verse.url_ref(),
+                ),
+            )
         else:
             url = None
 
-        tex += "\\verse[%d] %s\href{%s}{%s}\n" % (verse_number, footnote, url, verse_text)
+        tex += "\\verse[%d] %s\href{%s}{%s}\n" % (
+            verse_number,
+            footnote,
+            url,
+            verse_text,
+        )
 
     if in_chapter:
         tex += "\n\\end{biblechapter}\n"
-    return mark_safe( tex )
+    return mark_safe(tex)

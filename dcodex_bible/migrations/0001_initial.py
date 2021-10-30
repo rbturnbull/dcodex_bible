@@ -9,49 +9,86 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('dcodex', '0001_initial'),
+        ("dcodex", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='BibleManuscript',
+            name="BibleManuscript",
             fields=[
-                ('manuscript_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='dcodex.Manuscript')),
+                (
+                    "manuscript_ptr",
+                    models.OneToOneField(
+                        auto_created=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        parent_link=True,
+                        primary_key=True,
+                        serialize=False,
+                        to="dcodex.Manuscript",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
-                'base_manager_name': 'objects',
+                "abstract": False,
+                "base_manager_name": "objects",
             },
-            bases=('dcodex.manuscript',),
+            bases=("dcodex.manuscript",),
         ),
         migrations.CreateModel(
-            name='BibleVerse',
+            name="BibleVerse",
             fields=[
-                ('verse_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='dcodex.Verse')),
-                ('book', models.IntegerField()),
-                ('chapter', models.IntegerField()),
-                ('verse', models.IntegerField()),
-                ('word_count', models.IntegerField()),
-                ('char_count', models.IntegerField()),
-                ('char_aggregate', models.IntegerField(default=0)),
-                ('word_aggregate', models.IntegerField(default=0)),
+                (
+                    "verse_ptr",
+                    models.OneToOneField(
+                        auto_created=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        parent_link=True,
+                        primary_key=True,
+                        serialize=False,
+                        to="dcodex.Verse",
+                    ),
+                ),
+                ("book", models.IntegerField()),
+                ("chapter", models.IntegerField()),
+                ("verse", models.IntegerField()),
+                ("word_count", models.IntegerField()),
+                ("char_count", models.IntegerField()),
+                ("char_aggregate", models.IntegerField(default=0)),
+                ("word_aggregate", models.IntegerField(default=0)),
             ],
             options={
-                'abstract': False,
-                'base_manager_name': 'objects',
+                "abstract": False,
+                "base_manager_name": "objects",
             },
-            bases=('dcodex.verse',),
+            bases=("dcodex.verse",),
         ),
         migrations.CreateModel(
-            name='RubricTranscription',
+            name="RubricTranscription",
             fields=[
-                ('versetranscriptionbase_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='dcodex.VerseTranscriptionBase')),
-                ('location', models.CharField(choices=[('B', 'Before'), ('M', 'Middle'), ('A', 'After')], default='B', max_length=1)),
+                (
+                    "versetranscriptionbase_ptr",
+                    models.OneToOneField(
+                        auto_created=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        parent_link=True,
+                        primary_key=True,
+                        serialize=False,
+                        to="dcodex.VerseTranscriptionBase",
+                    ),
+                ),
+                (
+                    "location",
+                    models.CharField(
+                        choices=[("B", "Before"), ("M", "Middle"), ("A", "After")],
+                        default="B",
+                        max_length=1,
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
-                'base_manager_name': 'objects',
+                "abstract": False,
+                "base_manager_name": "objects",
             },
-            bases=('dcodex.versetranscriptionbase',),
+            bases=("dcodex.versetranscriptionbase",),
         ),
     ]
