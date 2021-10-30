@@ -17,4 +17,4 @@ class ImportBibleCommand(BaseCommand):
             if choice.lower() != "y":
                 return
 
-        BibleManuscript.create_from_csv(siglum=self.siglum, name=self.name, filename=path)
+        BibleManuscript.create_from_csv(siglum=options[], name=self.name, filename=path)

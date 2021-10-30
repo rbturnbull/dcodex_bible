@@ -1,12 +1,13 @@
 # DCodex Bible
 
 ![pipline](https://github.com/rbturnbull/dcodex_bible/actions/workflows/pipeline.yml/badge.svg)
+[<img src="https://img.shields.io/badge/code%20style-black-000000.svg">](<https://github.com/psf/black>)
 
-An extension for DCodex to use biblical manuscripts.
+An extension for dcodex to use biblical manuscripts.
 
 ## Installation
 
-For a brand new DCodex site, it is easiest to install using [dcodex-cookiecutter](https://github.com/rbturnbull/dcodex-cookiecutter).
+For a brand new dcodex site, it is easiest to install using [dcodex-cookiecutter](https://github.com/rbturnbull/dcodex-cookiecutter).
 
 To install dcodex-bible as a plugin in a dcodex site already set up. Install with pip:
 ```

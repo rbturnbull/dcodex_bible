@@ -25,6 +25,7 @@ def get_book_id(name):
     name = name.title()
     if name in book_names:
         return book_names.index( name )
+        
     if name in book_abbreviations:
         return book_abbreviations.index( name )
     
@@ -249,6 +250,7 @@ class BibleVerse(Verse):
     @classmethod
     def book_names( cls ):
         return book_names
+
     @classmethod
     def book_abbreviations( cls ):
         return book_abbreviations

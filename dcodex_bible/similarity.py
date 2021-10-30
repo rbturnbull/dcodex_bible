@@ -3,10 +3,7 @@ from .models import *
 
 
 #plt.style.use('seaborn-darkgrid')
-
-LIKELY__UNLIKELY=0
-HIGHLY_LIKELY__ELSE=1
-HIGHLY_LIKELY__LIKELY__ELSE=2
+from dcodex.similarity import LIKELY__UNLIKELY, HIGHLY_LIKELY__ELSE, HIGHLY_LIKELY__LIKELY__ELSE, SOLID
 
 def plot_rolling_average( 
             manuscript, 
