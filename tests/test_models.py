@@ -1,7 +1,9 @@
+from pathlib import Path
 from django.test import TestCase
 
 from dcodex_bible.models import *
 
+test_data_dir = Path(__file__).parent/"testdata"
 
 def make_verse(book_name, chapter, verse):
     rank = BibleVerse.objects.all().count() + 1
@@ -123,3 +125,21 @@ class BibleVerseTests(TestCase):
             [self.philippians1_20.id, self.philippians1_27.id],
             [x.id for x in BibleVerse.get_verses_from_string("Phil 1:20,27")],
         )
+    
+
+class TEITests(TestCase):
+    def assert_text_from_element(self, filename, gold_text):
+        with open(test_data_dir/filename) as f:
+            contents = f.read()
+        tree = etree.fromstring(contents)
+        text = text_from_element(tree)
+        self.assertEqual(text, gold_text)
+        
+    def test_text_from_element_ro_1_1(self):
+        self.assert_text_from_element("467_Ro1-1.xml", 'παυλος δουλος ιυ χυ κλητος αποστολος αφορισμενος εις ευαγγελιον θυ')
+
+    def test_text_from_element_ro_1_8(self):
+        self.assert_text_from_element("01_Ro1-8.xml", 'πρωτον μεν ευχαριστω τω θω μου περι παντων υμων οτι η πιστις υμων καταγγελλεται εν ολω τω κοσμω ·')
+
+    def test_text_from_element_ro_1_16(self):
+        self.assert_text_from_element("01_Ro1-16.xml", 'ουτω το κατ εμε προθυμον και υμιν τοις εν ρωμη ευαγγελισασθαι')

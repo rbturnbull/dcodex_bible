@@ -1,7 +1,8 @@
-# DCodex Bible
+# dcodex bible
 
 ![pipline](https://github.com/rbturnbull/dcodex_bible/actions/workflows/pipeline.yml/badge.svg)
 [<img src="https://img.shields.io/badge/code%20style-black-000000.svg">](<https://github.com/psf/black>)
+[![slack](https://img.shields.io/badge/dcodex-Join%20on%20Slack-green?style=flat&logo=slack)](https://join.slack.com/t/dcodex/shared_invite/zt-y2jpxumc-lDGGr3ZjndVqYLoyfCh1gA)
 
 An extension for dcodex to use biblical manuscripts.
 
@@ -32,7 +33,7 @@ urlpatterns += [
 
 To use the standard versification system of the Old and New Testaments, run this command:
 ```
-python manage.py import_bibleverses
+python manage.py import-bible-verses
 ```
 
 ## Installing Reference Bibles
@@ -47,6 +48,7 @@ python manage.py import_tisch
 python manage.py import_westcotthort
 python manage.py import_smithvandyck
 python manage.py import_smithvandyck_nt
+python manage.py import-swete
 ```
 
 ## Sources

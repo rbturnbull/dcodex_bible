@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dcodex_bible"
-version = "1.0.8"
+version = "1.0.9"
 description = "An extension for dcodex to use biblical manuscripts."
 authors = ["Robert Turnbull <robert.turnbull@unimelb.edu.au>"]
 license = "Apache-2.0"
@@ -10,6 +10,7 @@ repository = "https://github.com/rbturnbull/dcodex_bible"
 [tool.poetry.dependencies]
 python = ">=3.8,<3.10"
 dcodex = "^1.0.3"
+appdirs = "^1.4.4"
 
 [tool.poetry.dev-dependencies]
 coverage = "^5.5"

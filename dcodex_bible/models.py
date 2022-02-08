@@ -1,13 +1,14 @@
-from django.db import models
-from django.db.models import Max, Min
-from dcodex.models import Manuscript, Verse, VerseTranscriptionBase, Markup
 import re
-import logging
-import requests
+import unicodedata
 from lxml import etree
 from bs4 import BeautifulSoup
-import unicodedata
+
+from django.db import models
+from django.db.models import Max, Min
 from django.utils.functional import cached_property
+
+from dcodex.models import Manuscript, Verse, VerseTranscriptionBase, Markup
+from .files import cached_download
 
 
 book_names = [
@@ -78,6 +79,25 @@ book_names = [
     "3 John",
     "Jude",
     "Revelation",
+    # LXX
+    '1 Esdras',
+    'Wisdom of Solomon',
+    'Sirach Prologue',
+    'Sirach',
+    'Judith',
+    'Tobit',
+    'Baruch',
+    'Epistle of Jeremiah',
+    'Susanna',
+    'Bel and the Dragon',
+    '1 Maccabees',
+    '2 Maccabees',
+    '3 Maccabees',
+    '4 Maccabees',
+    'Psalms of Solomon',
+    '1 Enoch',
+    'Odes',
+
 ]
 book_abbreviations = [
     None,
@@ -147,7 +167,88 @@ book_abbreviations = [
     "3Jn",
     "Jud",
     "Rev",
+    '1Esd',
+    'Wis',
+    'Sirpro',
+    'Sir',
+    'Judith',
+    'Tob',
+    'Bar',
+    'Epj',
+    'Sus',
+    'Bel',
+    '1Mac',
+    '2Mac',
+    '3Mac',
+    '4Mac',
+    'Pss',
+    '1En',
+    'Odes',
 ]
+
+book_abbreviations_alternate = {
+    "Phlm": "Philemon",
+    "Phm": "Philemon",
+    "1Kgs": "1 Kings",
+    "2Kgs": "2 Kings",
+    "2Th": "2 Thessalonians",
+    "2T": "2 Timothy",
+    "2J": "2 John",
+    "3J": "3 John",
+    "Jd": "Jude",
+    "Ap": "Revelation",
+    "Mc": "Mark",
+    "L": "Luke",
+    "Php": "Philippians",
+    "Tt": "Titus",
+    "1Pt": "1 Peter",
+    "2Pt": "2 Peter",
+    "R": "Romans",
+}
+
+def element_to_text(element):
+    text = etree.tostring(
+        element, encoding="UTF-8", method="xml"
+    ).decode("utf-8")
+    text = re.sub(r'\s*<lb break="no"/>\s*', "", text) # big hack
+    text = re.sub(r'\s*<unclear>(.*)</unclear>\s*', r"\1", text)
+    text = BeautifulSoup(
+        text, "lxml"
+    ).text  # This is a bit of a hack
+    return text
+
+
+def text_from_element(verse_element):
+    verse_text = ""
+    delim = ""
+    # Remove line breaks which don't break the word
+
+
+
+    for element in verse_element:
+        if element.tag == "note":
+            continue
+        if element.tag == "pb":
+            delim = ""
+        if element.tag == "w":
+            if "part" in element.attrib:
+                delim = ""
+                element.attrib.pop("part")
+            
+        if element.tag == "app":
+            first_hand_element = element.find("./rdg[@type='orig']")
+            if first_hand_element is not None:
+                xml_string = text_from_element(first_hand_element)
+            else:
+                xml_string = ''
+        else:
+            xml_string = element_to_text(element)
+
+        verse_text = verse_text + delim + xml_string
+        delim = " "
+    verse_text = verse_text.replace("\n", "")
+    verse_text = re.sub(r"\s+", " ", verse_text).strip()
+    return verse_text
 
 
 def strip_namespace(el):
@@ -165,30 +266,12 @@ def get_book_id(name):
     if name in book_abbreviations:
         return book_abbreviations.index(name)
 
+    if name in book_abbreviations_alternate:
+        return book_names.index(book_abbreviations_alternate[name])
+
     for index, book_name in enumerate(book_names[1:]):
         if book_name.startswith(name) or book_name.replace(" ", "").startswith(name):
             return index + 1
-
-    book_abbreviations_alternate = {
-        "Phlm": "Philemon",
-        "Phm": "Philemon",
-        "1Kgs": "1 Kings",
-        "2Kgs": "2 Kings",
-        "2Th": "2 Thessalonians",
-        "2T": "2 Timothy",
-        "2J": "2 John",
-        "3J": "3 John",
-        "Jd": "Jude",
-        "Ap": "Revelation",
-        "Mc": "Mark",
-        "L": "Luke",
-        "Php": "Philippians",
-        "Tt": "Titus",
-        "1Pt": "1 Peter",
-        "2Pt": "2 Peter",
-    }
-    if name in book_abbreviations_alternate:
-        return book_names.index(book_abbreviations_alternate[name])
 
     return None
 
@@ -275,16 +358,54 @@ class BibleManuscript(Manuscript):
         context = dict(manuscript=self, baseurl=baseurl)
         return template.render(context)
 
-    def import_gregory_aland(self, gregory_aland=None):
+    def set_siglum_gregory_aland_number(self, gregory_aland=None):
         gregory_aland = gregory_aland or self.siglum
+        if self.siglum == None:
+            self.siglum = gregory_aland
 
+        m = re.match(r"GA(0?\d+)", gregory_aland)
+        if m:
+            gregory_aland = m.group(1)
+        return gregory_aland
+
+    def import_gregory_aland(self, gregory_aland=None, force: bool=False):
+        gregory_aland = self.set_siglum_gregory_aland_number(gregory_aland)
+        
+        self.try_import_intf(gregory_aland, force=force)
+
+        self.try_import_igntp_john(gregory_aland, force=force)        
+        self.try_import_igntp_romans(gregory_aland, force=force)
+        self.try_import_igntp_galatians(gregory_aland, force=force)
+        self.try_import_igntp_ephesians(gregory_aland, force=force)
+        self.try_import_igntp_philippians(gregory_aland, force=force)        
+
+    def try_import_intf_tei_url(self, url, filename, force=False):
         try:
-            self.import_igntp_iohannes(gregory_aland)
-        except:
-            print("import_igntp_iohannes failed")
-        self.import_intf(gregory_aland)
+            self.import_intf_tei_url(url, filename, force=force)
+        except Exception as err:
+            print(f"Failed to import {url}: {err}")
 
-    def import_igntp_iohannes(self, gregory_aland=None):
+    def try_import_igntp_romans(self, gregory_aland, force: bool = False):
+        filename = f"NT_GRC_{gregory_aland}_Rom.xml"
+        url = f"http://www.itseeweb.bham.ac.uk/epistulae/XML/transcriptions/greek/06/{filename}"
+        self.try_import_intf_tei_url(url, f'IGNTP/06-Romans/{filename}', force=force)
+
+    def try_import_igntp_galatians(self, gregory_aland, force: bool = False):
+        filename = f"NT_GRC_{gregory_aland}_Gal.xml"
+        url = f"http://www.itseeweb.bham.ac.uk/epistulae/XML/transcriptions/greek/09/{filename}"
+        self.try_import_intf_tei_url(url, f'IGNTP/09-Galatians/{filename}', force=force)
+
+    def try_import_igntp_ephesians(self, gregory_aland, force: bool = False):
+        filename = f"NT_GRC_{gregory_aland}_Eph.xml"
+        url = f"http://www.itseeweb.bham.ac.uk/epistulae/XML/transcriptions/greek/10/{filename}"
+        self.try_import_intf_tei_url(url, f'IGNTP/10-Ephesians/{filename}', force=force)
+
+    def try_import_igntp_philippians(self, gregory_aland, force: bool = False):
+        filename = f"NT_GRC_{gregory_aland}_Phil.xml"
+        url = f"http://www.itseeweb.bham.ac.uk/epistulae/XML/transcriptions/greek/11/{filename}"
+        self.try_import_intf_tei_url(url, f'IGNTP/11-Philippians/{filename}', force=force)
+
+    def try_import_igntp_john(self, gregory_aland=None, force: bool = False):
         gregory_aland = gregory_aland or self.siglum
         if self.siglum == None:
             self.siglum = gregory_aland
@@ -293,11 +414,11 @@ class BibleManuscript(Manuscript):
         if m:
             gregory_aland = m.group(1)
 
-        url = f"http://www.itseeweb.bham.ac.uk/iohannes/transcriptions/XML/greek/04_{gregory_aland}.xml"
+        filename = f"04_{gregory_aland}.xml"
+        url = f"http://www.itseeweb.bham.ac.uk/iohannes/transcriptions/XML/greek/{filename}"
+        self.try_import_intf_tei_url(url, f'IGNTP/04-John/{filename}', force=force)
 
-        self.import_intf_tei_url(url)
-
-    def import_intf(self, gregory_aland=None):
+    def try_import_intf(self, gregory_aland=None, force: bool = False):
         gregory_aland = gregory_aland or self.siglum
         if self.siglum == None:
             self.siglum = gregory_aland
@@ -324,13 +445,25 @@ class BibleManuscript(Manuscript):
                 print(f"Cannot get INTF ID from {gregory_aland}")
                 return
 
+        filename = f"{intf_id}.xml"
         url = f"http://ntvmr.uni-muenster.de/community/vmr/api/transcript/get/?docID={intf_id}&pageID=1-99999&format=teiraw"
-        self.import_intf_tei_url(url)
+        self.try_import_intf_tei_url(url, f'INTF/{filename}', force=force)
 
-    def import_intf_tei_url(self, url):
-        """Imports from a TEI document in the format of the INTF and Birmingham."""
-        response = requests.get(url)
-        tree = etree.fromstring(response.content)
+    def import_intf_tei_url(self, url, filename, force=False):
+        """
+        Imports from a TEI document in the format of the INTF and Birmingham.
+        
+        Takes a URL to a TEI XML file.
+        """
+        path = cached_download(url, filename, force=force)
+        return self.import_intf_tei(path)
+
+    def import_intf_tei(self, path:str):
+        """
+        Imports from a TEI document in the format of the INTF and Birmingham.
+        """        
+        tree = etree.parse(str(path))
+        tree = tree.getroot()
         strip_namespace(tree)
 
         # Find all verses
@@ -346,28 +479,7 @@ class BibleManuscript(Manuscript):
                 continue
                 # raise Exception(f"Cannot find verse {tei_verse_ID}.")
 
-            verse_text = ""
-            delim = ""
-            for element in verse_element:
-                if element.tag == "pb":
-                    delim = ""
-                if element.tag == "w" and "part" in element.attrib:
-                    delim = ""
-                    element.attrib.pop("part")
-                xml_string = etree.tostring(
-                    element, encoding="UTF-8", method="xml"
-                ).decode("utf-8")
-                xml_string = BeautifulSoup(
-                    xml_string, "lxml"
-                ).text  # This is a bit of a hack
-
-                verse_text = verse_text + delim + xml_string
-                delim = " "
-            verse_text = verse_text.replace("\n", "")
-            verse_text = re.sub(r"\s+", " ", verse_text)
-            verse_text = re.sub(
-                r"<w>(.*?)<\/w>", r"\1", verse_text
-            )  # I don't think this is necessary now
+            verse_text = text_from_element(verse_element)
 
             print(verse, verse_text)
             self.save_transcription(verse, verse_text)
