@@ -228,6 +228,10 @@ def text_from_element(verse_element):
     for element in verse_element:
         if element.tag == "note":
             continue
+        if element.tag == "seg" and element.attrib.get('type') == "margin":
+            continue
+        if element.tag == "fw":
+            continue
         if element.tag == "pb":
             delim = ""
         if element.tag == "w":
