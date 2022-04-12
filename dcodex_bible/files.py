@@ -39,7 +39,7 @@ def cached_download_path(url: str, local_path: (str, Path), force=False) -> None
         try:
             print(f"Downloading {url} to {local_path}")
             urllib.request.urlretrieve(url, local_path)
-        except:
+        except Exception:
             raise DownloadError(f"Error downloading {url}")
 
     if not local_path.exists() or local_path.stat().st_size == 0:

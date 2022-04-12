@@ -466,7 +466,8 @@ class BibleManuscript(Manuscript):
         """
         Imports from a TEI document in the format of the INTF and Birmingham.
         """        
-        tree = etree.parse(str(path))
+        parser = etree.XMLParser(ns_clean=True, recover=True)
+        tree = etree.parse(str(path), parser)
         tree = tree.getroot()
         strip_namespace(tree)
 
@@ -572,7 +573,7 @@ class BibleVerse(Verse):
             try:
                 verse = cls.get_from_values(book, chapter, verse_num)
                 return verse
-            except:
+            except Exception:
                 print(f"Cannot find verse from {tei_id}")
         return None
 
@@ -704,7 +705,7 @@ class BibleVerse(Verse):
             return cls.objects.filter(book=book).aggregate(Max("chapter"))[
                 "chapter__max"
             ]
-        except:
+        except Exception:
             return 1
 
     @classmethod
@@ -713,7 +714,7 @@ class BibleVerse(Verse):
             return cls.objects.filter(book=book, chapter=chapter).aggregate(
                 Max("verse")
             )["verse__max"]
-        except:
+        except Exception:
             return 1
 
     def book_name(self, abbreviation=False):
