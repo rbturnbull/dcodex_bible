@@ -2,7 +2,7 @@ import re
 import unicodedata
 from lxml import etree
 from bs4 import BeautifulSoup
-
+from rich.progress import track
 from django.db import models
 from django.db.models import Max, Min
 from django.utils.functional import cached_property
@@ -391,7 +391,8 @@ class BibleManuscript(Manuscript):
 
     def try_import_igntp_romans(self, gregory_aland, force: bool = False):
         filename = f"NT_GRC_{gregory_aland}_Rom.xml"
-        url = f"http://www.itseeweb.bham.ac.uk/epistulae/XML/transcriptions/greek/06/{filename}"
+        # url = f"http://www.itseeweb.bham.ac.uk/epistulae/XML/transcriptions/greek/06/{filename}"
+        url = f"https://itseeweb.cal.bham.ac.uk/epistulae/XML/transcriptions/greek/06/{filename}"
         self.try_import_intf_tei_url(url, f'IGNTP/06-Romans/{filename}', force=force)
 
     def try_import_igntp_galatians(self, gregory_aland, force: bool = False):
@@ -473,7 +474,7 @@ class BibleManuscript(Manuscript):
 
         # Find all verses
         verses = tree.findall(".//ab")
-        for verse_element in verses:
+        for verse_element in track(verses, description="Processing: "):
             if "n" not in verse_element.attrib:
                 continue
 
@@ -486,7 +487,7 @@ class BibleManuscript(Manuscript):
 
             verse_text = text_from_element(verse_element)
 
-            print(verse, verse_text)
+            # print(verse, verse_text)
             self.save_transcription(verse, verse_text)
 
     @classmethod
@@ -569,7 +570,7 @@ class BibleVerse(Verse):
             book = int(m.group(1)) + 39  # number of books in OT
             chapter = int(m.group(2))
             verse_num = int(m.group(3))
-            print("book, chapter, verse_num", book, chapter, verse_num)
+            # print("book, chapter, verse_num", book, chapter, verse_num)
             try:
                 verse = cls.get_from_values(book, chapter, verse_num)
                 return verse
