@@ -423,7 +423,7 @@ class BibleManuscript(Manuscript):
         url = f"http://www.itseeweb.bham.ac.uk/iohannes/transcriptions/XML/greek/{filename}"
         self.try_import_intf_tei_url(url, f'IGNTP/04-John/{filename}', force=force)
 
-    def try_import_intf(self, gregory_aland=None, force: bool = False):
+    def get_intf_id(self, gregory_aland=None):
         gregory_aland = gregory_aland or self.siglum
         if self.siglum == None:
             self.siglum = gregory_aland
@@ -447,8 +447,20 @@ class BibleManuscript(Manuscript):
             elif gregory_aland.isdigit():
                 intf_id = 30000 + int(gregory_aland)
             else:
-                print(f"Cannot get INTF ID from {gregory_aland}")
-                return
+                m = re.match(r"L(\d+)", gregory_aland)
+                if m:
+                    intf_id = 40000 + int(m.group(1))
+                else:
+                    print(f"Cannot get INTF ID from {gregory_aland}")
+                    return
+
+        return intf_id
+
+    def try_import_intf(self, gregory_aland=None, force: bool = False):
+        intf_id = self.get_intf_id(gregory_aland=gregory_aland)
+
+        if not intf_id:
+            return
 
         filename = f"{intf_id}.xml"
         url = f"http://ntvmr.uni-muenster.de/community/vmr/api/transcript/get/?docID={intf_id}&pageID=1-99999&format=teiraw"
@@ -500,6 +512,12 @@ class BibleManuscript(Manuscript):
             manuscript.name = gregory_aland
 
         manuscript.import_gregory_aland()
+
+    def set_rank_from_intf_id(self):
+        intf_id = self.get_intf_id()
+        if intf_id:
+            self.rank = intf_id
+            self.save()
 
 
 class BibleVerse(Verse):
