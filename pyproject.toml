@@ -9,6 +9,7 @@ repository = "https://github.com/rbturnbull/dcodex_bible"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.10"
+gotoh = {git = "https://github.com/rbturnbull/gotoh.git"}
 dcodex = "^1.0.3"
 appdirs = "^1.4.4"
 rich = "^12.2.0"
