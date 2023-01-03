@@ -504,8 +504,8 @@ class BibleManuscript(Manuscript):
 
     @classmethod
     def create_from_gregory_aland(cls, gregory_aland):
-        if gregory_aland and gregory_aland[0].isdigit():
-            gregory_aland = f"GA{gregory_aland}"
+        # if gregory_aland and gregory_aland[0].isdigit():
+        #     gregory_aland = f"GA{gregory_aland}"
 
         manuscript, _ = cls.objects.update_or_create(siglum=gregory_aland)
         if manuscript.name is None:
