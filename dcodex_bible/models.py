@@ -377,17 +377,27 @@ class BibleManuscript(Manuscript):
         
         self.try_import_intf(gregory_aland, force=force)
 
-        self.try_import_igntp_john(gregory_aland, force=force)        
+        self.try_import_igntp_john(gregory_aland, force=force)  
         self.try_import_igntp_romans(gregory_aland, force=force)
         self.try_import_igntp_galatians(gregory_aland, force=force)
         self.try_import_igntp_ephesians(gregory_aland, force=force)
         self.try_import_igntp_philippians(gregory_aland, force=force)        
+
+    def import_vetus_latina(self, siglum, force: bool=False):
+        book_ids = [6, 7, 8, 9]        
+        for book_id in book_ids:
+            self.try_import_igntp_vetus_latina(siglum, book_id, force=force)  
 
     def try_import_intf_tei_url(self, url, filename, force=False):
         try:
             self.import_intf_tei_url(url, filename, force=force)
         except Exception as err:
             print(f"Failed to import {url}: {err}")
+
+    def try_import_igntp_vetus_latina(self, siglum, book_id:int, force: bool = False):
+        filename = f"{book_id:02d}_{siglum}.xml"
+        url = f"https://itseeweb.cal.bham.ac.uk/epistulae/XML/compaul/{filename}"
+        self.try_import_intf_tei_url(url, f'IGNTP/compaul/{filename}', force=force)
 
     def try_import_igntp_romans(self, gregory_aland, force: bool = False):
         filename = f"NT_GRC_{gregory_aland}_Rom.xml"
@@ -492,15 +502,20 @@ class BibleManuscript(Manuscript):
 
             tei_verse_ID = verse_element.attrib["n"]
 
+            if "inscriptio" in tei_verse_ID or "subscriptio" in tei_verse_ID:
+                continue
+
             verse = self.verse_class().get_from_tei_id(tei_verse_ID)
             if not verse:
+                verse = self.verse_class().get_from_string(tei_verse_ID)
+            if not verse:
+                print(f"Verse not found {tei_verse_ID}")
                 continue
                 # raise Exception(f"Cannot find verse {tei_verse_ID}.")
 
             verse_text = text_from_element(verse_element)
-
-            # print(verse, verse_text)
             self.save_transcription(verse, verse_text)
+
 
     @classmethod
     def create_from_gregory_aland(cls, gregory_aland):
@@ -512,6 +527,14 @@ class BibleManuscript(Manuscript):
             manuscript.name = gregory_aland
 
         manuscript.import_gregory_aland()
+
+    @classmethod
+    def create_from_vetus_latina(cls, siglum):
+        manuscript, _ = cls.objects.update_or_create(siglum=siglum)
+        if manuscript.name is None:
+            manuscript.name = siglum
+
+        manuscript.import_vetus_latina(siglum)
 
     def set_rank_from_intf_id(self):
         intf_id = self.get_intf_id()
