@@ -41,13 +41,13 @@ python manage.py import-bible-verses
 If you want to install a reference Bible text, you can use one (or more) of the following commands:
 ```
 python manage.py import-world-english-bible
-python manage.py import_sblgnt
-python manage.py import_robinsonpierpont
-python manage.py import_textusreceptus
-python manage.py import_tisch
-python manage.py import_westcotthort
-python manage.py import_smithvandyck
-python manage.py import_smithvandyck_nt
+python manage.py import-sblgnt
+python manage.py import-robinsonpierpont
+python manage.py import-textusreceptus
+python manage.py import-tisch
+python manage.py import-westcotthort
+python manage.py import-smithvandyck
+python manage.py import-smithvandyck-nt
 python manage.py import-swete
 ```
 
