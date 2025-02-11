@@ -8,13 +8,13 @@ readme = "README.md"
 repository = "https://github.com/rbturnbull/dcodex_bible"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.10"
+python = ">=3.8,<3.12"
 gotoh = {git = "https://github.com/rbturnbull/gotoh.git"}
-dcodex = "^1.0.3"
+dcodex = {git = "https://github.com/rbturnbull/dcodex.git", branch="dates"}
 appdirs = "^1.4.4"
 rich = ">=12.2.0"
 
-[tool.poetry.dev-dependencies]
+[poetry.group.dev.dependencies]
 coverage = "^5.5"
 black = "^21.9b0"
 
