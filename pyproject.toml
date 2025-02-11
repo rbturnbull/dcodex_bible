@@ -11,7 +11,7 @@ repository = "https://github.com/rbturnbull/dcodex_bible"
 python = ">=3.8,<3.12"
 gotoh = {git = "https://github.com/rbturnbull/gotoh.git"}
 dcodex = {git = "https://github.com/rbturnbull/dcodex.git", branch="dates"}
-appdirs = "^1.4.4"
+appdirs = ">=1.4.4"
 rich = ">=12.2.0"
 
 [poetry.group.dev.dependencies]
