@@ -15,8 +15,8 @@ appdirs = ">=1.4.4"
 rich = ">=12.2.0"
 
 [poetry.group.dev.dependencies]
-coverage = "^5.5"
-black = "^21.9b0"
+coverage = ">=5.5"
+black = ">=21.9b0"
 
 [build-system]
 requires = ["setuptools >= 40.6.0", "poetry-core>=1.0.0"]
