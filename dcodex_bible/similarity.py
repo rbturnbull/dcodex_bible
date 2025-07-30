@@ -37,6 +37,7 @@ def plot_rolling_average(
     minor_chapter_markers=1,
     ymin=60,
     ymax=100,
+    window:int=4,
     annotations=[],
     annotation_color="red",
     annotations_spaces_to_lines=False,
@@ -78,6 +79,7 @@ def plot_rolling_average(
             transcriptions=transcriptions,
             gotoh_param=gotoh_param,
             weights=weights,
+            window=window,
             prior_log_odds=0.0,
         )
         if csv_filename:
